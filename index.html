@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>YUKI Advanced YT Engine</title>
+    <!-- Telegram WebApp JS -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+    
+    <style>
+        /* 🎨 ADVANCED GLASSMORPHISM UI */
+        :root {
+            --bg-color: var(--tg-theme-bg-color, #121212);
+            --text-color: var(--tg-theme-text-color, #ffffff);
+            --btn-color: var(--tg-theme-button-color, #6200ea);
+            --btn-text: var(--tg-theme-button-text-color, #ffffff);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin: 0;
+            background: linear-gradient(90deg, #ff007f, #6200ea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        /* Glassmorphism Card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 90%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--text-color);
+            font-size: 14px;
+            outline: none;
+        }
+
+        button {
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            background: var(--btn-color);
+            color: var(--btn-text);
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(98, 0, 234, 0.4);
+            transition: transform 0.2s;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        /* YouTube Player Container */
+        .player-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+            display: none; /* Hidden until played */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .player-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>👑 YUKI MATRIX ENGINE</h1>
+        <p>Advanced YouTube Web Player</p>
+    </div>
+
+    <div class="glass-card">
+        <div class="input-group">
+            <input type="text" id="yt-link" placeholder="Paste YouTube Link or Video ID here..." autocomplete="off">
+            <button onclick="loadVideo()">🚀 Play Video</button>
+        </div>
+
+        <div class="player-container" id="player-wrapper">
+            <div id="yt-player"></div>
+        </div>
+    </div>
+
+    <script>
+        // 1. Initialize Telegram WebApp
+        let tg = window.Telegram.WebApp;
+        tg.expand(); // Open in full screen
+        tg.ready();
+
+        let player;
+
+        // 2. YouTube IFrame API Initialization
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('yt-player', {
+                height: '100%',
+                width: '100%',
+                videoId: '', // Starts empty
+                playerVars: {
+                    'playsinline': 1,
+                    'autoplay': 1,
+                    'rel': 0 // Prevents random recommendations at the end
+                }
+            });
+        }
+
+        // 3. Extract Video ID from URL
+        function extractVideoID(url) {
+            let regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            let match = url.match(regExp);
+            if (match && match[2].length === 11) {
+                return match[2];
+            } else if (url.length === 11) {
+                return url; // If user directly pastes the 11-digit ID
+            }
+            return null;
+        }
+
+        // 4. Play Button Logic
+        function loadVideo() {
+            tg.HapticFeedback.impactOccurred('medium'); // Phone vibration feature!
+            
+            let inputUrl = document.getElementById('yt-link').value;
+            let videoId = extractVideoID(inputUrl);
+
+            if (videoId) {
+                document.getElementById('player-wrapper').style.display = 'block';
+                player.loadVideoById(videoId);
+                
+                // Change Telegram Main Button
+                tg.MainButton.text = "CLOSE PLAYER";
+                tg.MainButton.show();
+                tg.MainButton.onClick(() => {
+                    tg.close();
+                });
+            } else {
+                tg.showAlert("❌ Invalid YouTube Link! Please check again.");
+            }
+        }
+    </script>
+</body>
+</html>
