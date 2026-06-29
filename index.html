@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ʏᴜᴋɪ ᴍᴀᴛʀɪx ᴩʟᴀʏᴇʀ</title>
-    
+
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -16,7 +16,7 @@
         <h1 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400 drop-shadow-[0_0_12px_rgba(168,85,247,0.8)] tracking-wider">
             ʏᴜᴋɪ ᴍᴀᴛʀɪx
         </h1>
-        
+
         <div class="flex items-center space-x-2 bg-black/60 p-1.5 rounded-full border border-gray-800 shadow-[0_0_10px_rgba(0,0,0,0.5)] backdrop-blur-md">
             <span class="text-[9px] pl-2 text-green-400 font-bold tracking-widest">ᴊɪᴏꜱᴀᴀᴠɴ</span>
             <label class="relative inline-flex items-center cursor-pointer">
@@ -28,15 +28,15 @@
     </header>
 
     <main class="flex-1 overflow-y-auto pb-32 px-4 scrollbar-hide relative z-0" id="main-content">
-        
+
         <section id="tab-search" class="w-full">
             <div class="relative w-full mb-6 mt-2 group">
                 <i class="fa-solid fa-search absolute left-4 top-4 text-gray-400 group-focus-within:text-cyan-400 transition-colors"></i>
                 <input type="text" id="search-input" class="w-full bg-gray-900/50 border border-gray-700 text-white rounded-2xl py-3.5 pl-12 pr-4 outline-none focus:border-cyan-400 focus:bg-gray-900/80 focus:shadow-[0_0_20px_rgba(34,211,238,0.2)] transition-all placeholder-gray-500 backdrop-blur-sm" placeholder="ꜱᴇᴀʀᴄʜ ꜱᴏɴɢꜱ, ᴀʀᴛɪꜱᴛꜱ...">
             </div>
-            
+
             <h2 class="text-xs text-gray-500 mb-3 ml-1 font-semibold tracking-widest uppercase">ꜱᴇᴀʀᴄʜ ʀᴇꜱᴜʟᴛꜱ</h2>
-            
+
             <ul id="search-results" class="space-y-2">
                 <li class="flex items-center justify-between p-2.5 hover:bg-white/5 rounded-xl transition cursor-pointer border border-transparent hover:border-gray-800">
                     <div class="flex items-center space-x-3.5">
@@ -81,7 +81,7 @@
                 <div class="absolute inset-0 bg-purple-500/20 blur-3xl rounded-full"></div>
                 <img id="player-cover" src="https://i.scdn.co/image/ab67616d00001e021a8c4618eaa885af490c6a71" class="relative w-full h-full object-cover rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10">
             </div>
-            
+
             <div class="w-full flex justify-between items-center mb-8">
                 <div class="overflow-hidden pr-4">
                     <h2 id="player-title" class="text-2xl font-black text-white truncate tracking-wide">ᴛᴜᴍ ʜɪ ʜᴏ</h2>
@@ -93,21 +93,21 @@
             <div class="w-full mb-8">
                 <input type="range" id="seek-bar" class="w-full h-1.5 bg-gray-800 rounded-full appearance-none cursor-pointer outline-none accent-cyan-400 hover:accent-cyan-300 transition-all" value="0" max="100">
                 <div class="flex justify-between text-[11px] text-gray-500 mt-3 font-semibold">
-                    <span id="current-time">1:12</span>
-                    <span id="total-time">4:28</span>
+                    <span id="current-time">0:00</span>
+                    <span id="total-time">0:00</span>
                 </div>
             </div>
 
             <div class="w-full flex items-center justify-between px-1">
                 <i class="fa-solid fa-shuffle text-lg text-gray-500 hover:text-white transition cursor-pointer"></i>
                 <i id="prev-btn" class="fa-solid fa-backward-step text-3xl text-gray-300 hover:text-white transition cursor-pointer active:scale-90"></i>
-                
+
                 <div id="play-pause-btn" class="w-[85px] h-[85px] bg-gradient-to-br from-purple-600 to-cyan-500 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(168,85,247,0.4)] cursor-pointer active:scale-90 transition-transform">
                     <div class="w-[75px] h-[75px] bg-[#050505] rounded-full flex items-center justify-center">
                         <i id="play-icon" class="fa-solid fa-play text-2xl text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400 ml-1"></i>
                     </div>
                 </div>
-                
+
                 <i id="next-btn" class="fa-solid fa-forward-step text-3xl text-gray-300 hover:text-white transition cursor-pointer active:scale-90"></i>
                 <i class="fa-solid fa-repeat text-lg text-gray-500 hover:text-white transition cursor-pointer"></i>
             </div>
@@ -133,6 +133,7 @@
 
     <script src="api.js"></script>
     <script src="player.js"></script>
+    <script src="audio.js"></script> 
 
 </body>
 </html>
