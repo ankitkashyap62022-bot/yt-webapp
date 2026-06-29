@@ -3,37 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>YUKI Music - Premium Neon Edition</title>
+    <title>YUKI Matrix Engine</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* 🎨 YUKI NEON PREMIUM UI (Spotify Inspired) */
         :root {
-            --bg-dark: #000000;
-            --bg-card: #121212;
-            --bg-elevated: #282828;
-            --neon-primary: #00f3ff; /* Cyan */
-            --neon-secondary: #ff007f; /* Pink */
+            --bg-dark: #09090b;
+            --bg-card: #18181b;
+            --bg-elevated: #27272a;
+            --matrix-green: #00ff41; /* Real Matrix Green */
+            --matrix-dark: #008f11;
             --text-main: #ffffff;
-            --text-sub: #b3b3b3;
+            --text-sub: #a1a1aa;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
         body {
             background-color: var(--bg-dark);
             color: var(--text-main);
-            padding-bottom: 140px; /* Space for player + nav */
+            padding-bottom: 140px; 
             overflow-x: hidden;
         }
 
-        /* 👑 YUKI Branding Header */
+        /* 👑 YUKI MATRIX HEADER */
         .header {
             padding: 20px 15px 10px;
             display: flex;
@@ -41,32 +40,28 @@
             align-items: center;
             position: sticky;
             top: 0;
-            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
+            background: rgba(9, 9, 11, 0.9);
+            backdrop-filter: blur(10px);
             z-index: 100;
         }
 
         .header h1 {
-            font-size: 24px;
-            font-weight: 800;
-            letter-spacing: 1px;
-            color: #fff;
-            text-shadow: 0 0 10px var(--neon-secondary), 0 0 20px var(--neon-secondary);
-            animation: pulse 2s infinite;
+            font-family: 'Arial Black', Impact, sans-serif;
+            font-size: 26px;
+            text-transform: uppercase;
+            color: var(--matrix-green);
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--matrix-dark), 0 0 20px var(--matrix-green);
         }
 
-        @keyframes pulse {
-            0% { text-shadow: 0 0 5px var(--neon-secondary); }
-            50% { text-shadow: 0 0 20px var(--neon-secondary), 0 0 30px var(--neon-secondary); }
-            100% { text-shadow: 0 0 5px var(--neon-secondary); }
-        }
-
-        /* 📱 Views (Home & Search) */
+        /* 📱 Views */
         .view { display: none; padding: 0 15px; }
         .view.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 🎵 Home Screen: Grid (Recently Played) */
+        /* 🏠 HOME SCREEN */
         .section-title { font-size: 18px; font-weight: 700; margin: 20px 0 15px; }
+        
         .grid-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -78,20 +73,19 @@
             display: flex;
             align-items: center;
             overflow: hidden;
-            box-shadow: 0 0 5px rgba(0, 243, 255, 0.1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
             transition: 0.2s;
+            cursor: pointer;
         }
-        .grid-item:active { background-color: #333; transform: scale(0.98); }
+        .grid-item:active { transform: scale(0.96); background: #333; }
         .grid-item img { width: 55px; height: 55px; object-fit: cover; }
         .grid-item span { padding: 0 10px; font-size: 13px; font-weight: 600; }
 
-        /* 🎵 Home Screen: Horizontal Scroll */
         .scroll-container {
             display: flex;
             overflow-x: auto;
             gap: 15px;
             padding-bottom: 10px;
-            scroll-snap-type: x mandatory;
         }
         .scroll-container::-webkit-scrollbar { display: none; }
         .card {
@@ -99,121 +93,110 @@
             background: var(--bg-card);
             padding: 10px;
             border-radius: 8px;
-            scroll-snap-align: start;
+            cursor: pointer;
         }
         .card img {
             width: 110px;
             height: 110px;
             border-radius: 6px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             margin-bottom: 10px;
+            object-fit: cover;
         }
         .card .title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .card .sub { font-size: 11px; color: var(--text-sub); margin-top: 4px; }
 
-        /* 🔍 Search View */
-        .search-box {
-            position: relative;
-            margin-bottom: 20px;
-        }
+        /* 🔍 SEARCH SCREEN */
+        .search-box { position: relative; margin-bottom: 20px; }
         .search-box input {
             width: 100%;
             padding: 14px 14px 14px 40px;
             border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.1);
-            background: #242424;
+            border: 1px solid var(--matrix-dark);
+            background: #111;
             color: white;
             font-size: 15px;
             outline: none;
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.1);
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.1);
         }
-        .search-box input:focus {
-            border-color: var(--neon-primary);
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
-        }
-        .search-box i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-sub);
-        }
+        .search-box input:focus { border-color: var(--matrix-green); box-shadow: 0 0 15px rgba(0, 255, 65, 0.3); }
+        .search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--matrix-green); }
+        
         .search-result-item {
             display: flex;
             align-items: center;
             padding: 10px 0;
             gap: 15px;
             border-bottom: 1px solid rgba(255,255,255,0.05);
+            cursor: pointer;
         }
-        .search-result-item img { width: 50px; height: 50px; border-radius: 5px; }
+        .search-result-item img { width: 50px; height: 50px; border-radius: 5px; object-fit: cover; }
         .search-info { flex: 1; overflow: hidden; }
         .search-info .title { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .search-info .artist { font-size: 13px; color: var(--text-sub); margin-top: 4px; }
 
-        /* 🎧 Custom Bottom Player (Spotify Style) */
+        /* 🎧 BOTTOM PLAYER */
         .bottom-player {
             position: fixed;
-            bottom: 60px; /* Above nav bar */
+            bottom: 60px;
             left: 10px;
             right: 10px;
-            background: #181818;
+            background: #18181b;
             border-radius: 8px;
             padding: 8px 12px;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.9), 0 0 10px rgba(255, 0, 127, 0.3);
-            border: 1px solid rgba(255, 0, 127, 0.2);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.9), 0 0 10px rgba(0, 255, 65, 0.2);
+            border: 1px solid var(--matrix-dark);
             z-index: 999;
-            display: none; /* Hidden initially */
+            display: none;
         }
-        .player-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .player-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            overflow: hidden;
-            flex: 1;
-        }
+        .player-row { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+        .player-left { display: flex; align-items: center; gap: 10px; overflow: hidden; flex: 1; }
         .player-left img { width: 40px; height: 40px; border-radius: 5px; }
         .player-text { overflow: hidden; }
-        .player-title { font-size: 13px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--neon-primary); }
+        .player-title { font-size: 13px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--matrix-green); }
         .player-artist { font-size: 11px; color: var(--text-sub); }
-        .player-controls {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            color: white;
-            font-size: 20px;
-        }
-        /* Neon Progress Bar */
-        .progress-container {
-            width: 100%;
-            height: 3px;
-            background: #444;
-            border-radius: 2px;
-            margin-top: 8px;
-            cursor: pointer;
-            overflow: hidden;
-        }
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: var(--neon-primary);
-            box-shadow: 0 0 10px var(--neon-primary);
-            transition: width 0.1s linear;
-        }
+        
+        .player-controls { display: flex; align-items: center; gap: 20px; color: white; font-size: 20px; }
+        
+        .progress-container { width: 100%; height: 3px; background: #333; border-radius: 2px; margin-top: 8px; overflow: hidden; }
+        .progress-bar { height: 100%; width: 0%; background: var(--matrix-green); box-shadow: 0 0 10px var(--matrix-green); transition: width 0.1s linear; }
 
-        /* 📱 Bottom Navigation Bar */
+        /* 📱 FULL SCREEN PLAYER */
+        .fullscreen-player {
+            position: fixed;
+            top: 100%; /* Hidden below */
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-dark);
+            z-index: 2000;
+            transition: top 0.3s ease-in-out;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .fullscreen-player.active { top: 0; }
+        
+        .fs-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; font-size: 20px; }
+        .fs-header span { font-size: 12px; letter-spacing: 2px; color: var(--matrix-green); text-transform: uppercase; }
+        
+        .fs-image { width: 100%; aspect-ratio: 1/1; border-radius: 10px; object-fit: cover; box-shadow: 0 10px 30px rgba(0, 255, 65, 0.3); margin-bottom: 30px; }
+        
+        .fs-info { margin-bottom: 20px; }
+        .fs-title { font-size: 24px; font-weight: bold; color: white; margin-bottom: 5px; }
+        .fs-artist { font-size: 16px; color: var(--text-sub); }
+        
+        .fs-controls { display: flex; justify-content: space-between; align-items: center; font-size: 35px; color: white; margin-top: 30px; padding: 0 20px; }
+        .fs-play-btn { background: var(--matrix-green); color: black; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 20px var(--matrix-green); }
+
+        /* 📱 BOTTOM NAV */
         .bottom-nav {
             position: fixed;
             bottom: 0;
             left: 0;
             width: 100%;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(9, 9, 11, 0.95);
             backdrop-filter: blur(15px);
             display: flex;
             justify-content: space-around;
@@ -221,25 +204,16 @@
             border-top: 1px solid #222;
             z-index: 1000;
         }
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-            color: var(--text-sub);
-            font-size: 10px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 5px; color: var(--text-sub); font-size: 10px; cursor: pointer; }
         .nav-item i { font-size: 20px; }
-        .nav-item.active { color: white; text-shadow: 0 0 10px var(--neon-primary); }
+        .nav-item.active { color: var(--matrix-green); text-shadow: 0 0 10px var(--matrix-green); }
 
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>YUKI MUSIC</h1>
+        <h1>YUKI MATRIX</h1>
         <i class="fa-solid fa-gear" style="font-size: 20px; color: var(--text-sub);"></i>
     </div>
 
@@ -248,27 +222,27 @@
         <div class="grid-container" id="recent-grid">
             </div>
 
-        <h2 class="section-title">Picked for you</h2>
+        <h2 class="section-title">Matrix Recommendations</h2>
         <div class="scroll-container" id="picked-scroll">
             </div>
     </div>
 
     <div id="view-search" class="view">
-        <h2 class="section-title">Search</h2>
+        <h2 class="section-title">Search Engine</h2>
         <div class="search-box">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="searchInput" placeholder="What do you want to listen to?" oninput="debounceSearch()">
+            <input type="text" id="searchInput" placeholder="Search any artist or song..." oninput="debounceSearch()">
         </div>
         <div id="searchResults">
-            <div style="text-align: center; color: #555; margin-top: 40px; font-size: 14px;">
-                <i class="fa-solid fa-music" style="font-size: 40px; margin-bottom: 10px;"></i><br>
-                Find your favorite songs
+            <div style="text-align: center; color: #555; margin-top: 40px;">
+                <i class="fa-solid fa-bolt" style="font-size: 40px; margin-bottom: 10px; color: var(--matrix-dark);"></i><br>
+                Type to search the Matrix
             </div>
         </div>
     </div>
 
     <div class="bottom-player" id="player">
-        <div class="player-row">
+        <div class="player-row" onclick="openFullScreen()">
             <div class="player-left">
                 <img id="p-img" src="" alt="Cover">
                 <div class="player-text">
@@ -277,14 +251,32 @@
                 </div>
             </div>
             <div class="player-controls">
-                <i class="fa-solid fa-heart" style="font-size: 16px; color: var(--neon-secondary);"></i>
-                <i class="fa-solid fa-play" id="playPauseBtn" onclick="togglePlay()"></i>
+                <i class="fa-solid fa-play" id="playPauseBtn" onclick="event.stopPropagation(); togglePlay()"></i>
             </div>
         </div>
-        <div class="progress-container" onclick="seek(event)">
-            <div class="progress-bar" id="p-bar"></div>
-        </div>
+        <div class="progress-container"><div class="progress-bar" id="p-bar"></div></div>
         <audio id="audioElement"></audio>
+    </div>
+
+    <div class="fullscreen-player" id="fs-player">
+        <div class="fs-header">
+            <i class="fa-solid fa-chevron-down" onclick="closeFullScreen()" style="cursor: pointer;"></i>
+            <span>Now Playing</span>
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+        </div>
+        <img id="fs-img" class="fs-image" src="" alt="Cover">
+        <div class="fs-info">
+            <div class="fs-title" id="fs-title">Song Title</div>
+            <div class="fs-artist" id="fs-artist">Artist Name</div>
+        </div>
+        <div class="progress-container" style="height: 5px; margin-top: 20px;"><div class="progress-bar" id="fs-bar"></div></div>
+        <div class="fs-controls">
+            <i class="fa-solid fa-backward-step"></i>
+            <div class="fs-play-btn" onclick="togglePlay()">
+                <i class="fa-solid fa-pause" id="fs-playPauseBtn"></i>
+            </div>
+            <i class="fa-solid fa-forward-step"></i>
+        </div>
     </div>
 
     <div class="bottom-nav">
@@ -296,65 +288,64 @@
             <i class="fa-solid fa-magnifying-glass"></i>
             <span>Search</span>
         </div>
-        <div class="nav-item">
-            <i class="fa-solid fa-book-open"></i>
-            <span>Library</span>
-        </div>
     </div>
 
     <script>
-        // Telegram Setup
         let tg = window.Telegram.WebApp;
         tg.expand();
         tg.ready();
-        tg.setHeaderColor('#000000');
+        tg.setHeaderColor('#09090b');
 
-        // Core Elements
         const audio = document.getElementById('audioElement');
         const playPauseBtn = document.getElementById('playPauseBtn');
+        const fsPlayPauseBtn = document.getElementById('fs-playPauseBtn');
         const progressBar = document.getElementById('p-bar');
+        const fsProgressBar = document.getElementById('fs-bar');
         const playerUI = document.getElementById('player');
         let searchTimeout;
 
-        // Dummy Data for Home Screen (To look like a real app)
-        const dummyData = [
-            { title: "Karan Aujla Hits", img: "https://i.scdn.co/image/ab6761610000e5ebb6b93dcbe567a5b3f07a2107" },
-            { title: "Desi Hip Hop", img: "https://i.scdn.co/image/ab67706f00000002b8d0eeefecb9549df0c34eef" },
-            { title: "Arijit Singh", img: "https://i.scdn.co/image/ab6761610000e5eb0261696c5df3be99da6ed3f3" },
-            { title: "Punjabi 101", img: "https://i.scdn.co/image/ab67706f000000021ce43f11d1eb977507ebf0ad" },
-            { title: "Bollywood Mush", img: "https://i.scdn.co/image/ab67706f000000028711bd4047b7194858f9fcbc" },
-            { title: "Global Top 50", img: "https://i.scdn.co/image/ab67706f000000029249b35f23fb596b8f006a16" }
+        // FIXED IMAGES & WORKING CLICKS
+        const gridData = [
+            { title: "Karan Aujla", img: "https://images.unsplash.com/photo-1516280440502-86103632ab3d?w=200" },
+            { title: "Arijit Singh", img: "https://images.unsplash.com/photo-1598387993441-a364f854c3e1?w=200" },
+            { title: "Desi Hip Hop", img: "https://images.unsplash.com/photo-1603514930101-383796d115a7?w=200" },
+            { title: "Kalam Ink", img: "https://images.unsplash.com/photo-1520166249704-5858cf0b4112?w=200" }
         ];
 
-        // Load Home Data
+        const scrollData = [
+            { title: "Bollywood Hits", img: "https://images.unsplash.com/photo-1493225457124-a1a2a5956093?w=300" },
+            { title: "Punjabi 101", img: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300" },
+            { title: "Global Top 50", img: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300" }
+        ];
+
         function loadHome() {
             const grid = document.getElementById('recent-grid');
             const scroll = document.getElementById('picked-scroll');
             
-            // Populate 6 grid items
-            dummyData.forEach(item => {
-                grid.innerHTML += `<div class="grid-item" onclick="switchView('search', document.querySelectorAll('.nav-item')[1])"><img src="${item.img}"><span>${item.title}</span></div>`;
+            gridData.forEach(item => {
+                grid.innerHTML += `<div class="grid-item" onclick="autoSearch('${item.title}')"><img src="${item.img}"><span>${item.title}</span></div>`;
             });
 
-            // Populate scroll items
-            dummyData.reverse().forEach(item => {
-                scroll.innerHTML += `<div class="card" onclick="switchView('search', document.querySelectorAll('.nav-item')[1])"><img src="${item.img}"><div class="title">${item.title}</div><div class="sub">Yuki Recommendations</div></div>`;
+            scrollData.forEach(item => {
+                scroll.innerHTML += `<div class="card" onclick="autoSearch('${item.title}')"><img src="${item.img}"><div class="title">${item.title}</div><div class="sub">Tap to play</div></div>`;
             });
         }
         loadHome();
 
-        // Navigation Logic
         function switchView(viewId, el) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById('view-' + viewId).classList.add('active');
-            
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             el.classList.add('active');
-            
-            if(viewId === 'search') document.getElementById('searchInput').focus();
         }
 
-        // Search Logic (iTunes API)
+        // AUTO SEARCH WHEN HOME ITEM IS CLICKED
+        function autoSearch(query) {
+            switchView('search', document.querySelectorAll('.nav-item')[1]);
+            document.getElementById('searchInput').value = query;
+            fetchResults();
+        }
+
         function debounceSearch() {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(fetchResults, 500);
@@ -364,15 +355,11 @@
             const query = document.getElementById('searchInput').value;
             const resContainer = document.getElementById('searchResults');
             
-            if (!query) {
-                resContainer.innerHTML = '';
-                return;
-            }
-
-            resContainer.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--neon-primary);"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>';
+            if (!query) { resContainer.innerHTML = ''; return; }
+            resContainer.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--matrix-green);"><i class="fa-solid fa-spinner fa-spin"></i> Hacking the Matrix...</div>';
 
             try {
-                const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=15`);
+                const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=20`);
                 const data = await res.json();
                 
                 resContainer.innerHTML = '';
@@ -382,9 +369,7 @@
                 }
 
                 data.results.forEach(song => {
-                    // Changing artwork to high quality
                     let hqImg = song.artworkUrl100.replace('100x100', '300x300');
-                    
                     let div = document.createElement('div');
                     div.className = 'search-result-item';
                     div.onclick = () => playSong(song.previewUrl, song.trackName, song.artistName, hqImg);
@@ -394,62 +379,61 @@
                             <div class="title">${song.trackName}</div>
                             <div class="artist">${song.artistName}</div>
                         </div>
-                        <i class="fa-solid fa-ellipsis-vertical" style="color: #666; padding: 0 10px;"></i>
                     `;
                     resContainer.appendChild(div);
                 });
             } catch (err) {
-                resContainer.innerHTML = '<div style="text-align:center; padding: 20px; color: red;">Error searching!</div>';
+                resContainer.innerHTML = '<div style="text-align:center; color: red;">Error searching!</div>';
             }
         }
 
-        // Player Logic
         function playSong(url, title, artist, img) {
             tg.HapticFeedback.impactOccurred('medium');
             
+            // Set mini player
             document.getElementById('p-title').innerText = title;
             document.getElementById('p-artist').innerText = artist;
             document.getElementById('p-img').src = img;
+            
+            // Set full screen player
+            document.getElementById('fs-title').innerText = title;
+            document.getElementById('fs-artist').innerText = artist;
+            document.getElementById('fs-img').src = img.replace('300x300', '600x600');
             
             audio.src = url;
             audio.play();
             
             playerUI.style.display = 'flex';
-            playPauseBtn.className = 'fa-solid fa-pause';
+            updatePlayIcons(true);
         }
 
         function togglePlay() {
-            if(audio.paused) {
-                audio.play();
-                playPauseBtn.className = 'fa-solid fa-pause';
-            } else {
-                audio.pause();
-                playPauseBtn.className = 'fa-solid fa-play';
-            }
             tg.HapticFeedback.impactOccurred('light');
+            if(audio.paused) { audio.play(); updatePlayIcons(true); } 
+            else { audio.pause(); updatePlayIcons(false); }
         }
 
-        // Custom Progress Bar Update
+        function updatePlayIcons(isPlaying) {
+            playPauseBtn.className = isPlaying ? 'fa-solid fa-pause' : 'fa-solid fa-play';
+            fsPlayPauseBtn.className = isPlaying ? 'fa-solid fa-pause' : 'fa-solid fa-play';
+        }
+
+        // Full Screen logic
+        function openFullScreen() { document.getElementById('fs-player').classList.add('active'); }
+        function closeFullScreen() { document.getElementById('fs-player').classList.remove('active'); }
+
         audio.addEventListener('timeupdate', () => {
             if(audio.duration) {
                 const percent = (audio.currentTime / audio.duration) * 100;
                 progressBar.style.width = percent + '%';
+                fsProgressBar.style.width = percent + '%';
             }
         });
 
-        // Seek Audio
-        function seek(e) {
-            const container = e.currentTarget;
-            const clickX = e.offsetX;
-            const width = container.clientWidth;
-            const percent = clickX / width;
-            audio.currentTime = percent * audio.duration;
-        }
-        
-        // Auto Reset when song ends
         audio.addEventListener('ended', () => {
-            playPauseBtn.className = 'fa-solid fa-play';
+            updatePlayIcons(false);
             progressBar.style.width = '0%';
+            fsProgressBar.style.width = '0%';
         });
     </script>
 </body>
