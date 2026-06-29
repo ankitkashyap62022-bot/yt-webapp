@@ -9,14 +9,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
-    
+
     <script src="https://www.youtube.com/iframe_api"></script>
 
     <link rel="stylesheet" href="ui.css?v=8">
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
+
         /* 👨‍💻 Hacker Terminal Animations */
         .terminal-text { font-family: 'Fira Code', monospace; }
         .typewriter {
@@ -25,7 +25,7 @@
         }
         .delay-1 { animation-delay: 1.5s; }
         .delay-2 { animation-delay: 3s; border-right: none; }
-        
+
         @keyframes typing { to { width: 100%; } }
         @keyframes blink { 50% { border-color: transparent; } }
 
@@ -58,7 +58,7 @@
 
     <main class="flex-1 overflow-y-auto pb-36 scrollbar-hide relative z-0 no-scrollbar" id="main-content" style="font-family: sans-serif;">
         <section class="w-full px-4 pt-4">
-            
+
             <div class="relative w-full mb-4 group z-20">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
                     <i class="fa-solid fa-search text-gray-500 group-focus-within:text-cyan-400 transition-colors text-lg"></i>
@@ -72,7 +72,7 @@
                     <span id="clear-history-btn" class="text-[10px] text-red-500 font-bold cursor-pointer hover:text-red-400 transition-colors">CLEAR</span>
                 </div>
                 <div id="search-history-list" class="flex flex-wrap gap-2">
-                    </div>
+                </div>
             </div>
 
             <div id="empty-state" class="flex flex-col items-start justify-center mt-8 px-2 terminal-text text-xs">
@@ -101,14 +101,17 @@
 
     <div id="mini-player" class="fixed bottom-[80px] left-3 right-3 bg-gray-900/90 backdrop-blur-2xl border border-white/10 rounded-2xl p-2.5 flex items-center justify-between cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.8)] z-40 transition-transform">
         <div class="flex items-center space-x-3.5 w-[65%] z-10">
-            <img id="mini-img" src="https://telegra.ph/file/default.jpg" class="w-11 h-11 rounded-lg object-cover shadow-md">
+            <div class="w-11 h-11 rounded-lg bg-black/50 border border-white/5 flex items-center justify-center overflow-hidden">
+                <img id="mini-img" src="" class="w-full h-full object-cover shadow-md opacity-0 transition-opacity duration-300">
+                <i class="fa-solid fa-music text-gray-600 absolute -z-10"></i>
+            </div>
             <div class="truncate">
-                <h4 id="mini-title" class="text-white text-[13px] font-extrabold truncate">Yuki Matrix</h4>
-                <p id="mini-artist" class="text-[10px] text-cyan-400 font-semibold truncate">System Ready</p>
+                <h4 id="mini-title" class="text-white text-[13px] font-extrabold truncate">Select a Track</h4>
+                <p id="mini-artist" class="text-[10px] text-gray-500 font-semibold truncate">...</p>
             </div>
         </div>
         <div class="flex items-center space-x-5 pr-3 z-10">
-            <i id="mini-play-btn" class="fa-solid fa-play text-white text-xl"></i>
+            <i id="mini-play-btn" class="fa-solid fa-play text-gray-600 text-xl pointer-events-none"></i>
         </div>
         <div class="absolute bottom-0 left-0 right-0 h-1 bg-gray-800/50">
             <div id="mini-progress" class="h-full bg-cyan-400 w-0 transition-all"></div>
@@ -117,7 +120,7 @@
 
     <div id="full-player" class="fixed inset-0 bg-[#050505] z-50 flex flex-col transition-transform duration-500 translate-y-full overflow-y-auto no-scrollbar" style="font-family: sans-serif;">
         <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-            <img id="player-bg-blur" src="https://telegra.ph/file/default.jpg" class="w-full h-full object-cover opacity-30 blur-[80px] scale-110">
+            <img id="player-bg-blur" src="" class="w-full h-full object-cover opacity-10 blur-[80px] scale-110">
             <div class="absolute inset-0 bg-gradient-to-b from-[#050505]/40 via-[#050505]/80 to-[#050505]"></div>
         </div>
 
@@ -126,7 +129,7 @@
                 <i class="fa-solid fa-chevron-down text-lg text-white"></i>
             </div>
             <div class="flex flex-col items-center" style="font-family: 'Orbitron', sans-serif;">
-                <span id="player-source-label" class="text-[11px] text-cyan-400 font-bold tracking-widest mt-0.5">MATRIX SERVER</span>
+                <span id="player-source-label" class="text-[11px] text-gray-500 font-bold tracking-widest mt-0.5">AWAITING SIGNAL</span>
             </div>
             <div class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 border border-white/5 cursor-pointer backdrop-blur-md">
                 <i class="fa-solid fa-ellipsis-vertical text-lg text-white"></i>
@@ -134,18 +137,19 @@
         </div>
 
         <div class="flex flex-col items-center justify-start px-8 pb-10 z-10 relative w-full min-h-screen">
-            
-            <div id="media-container" class="relative w-full max-w-[320px] aspect-video sm:aspect-square mb-10 group overflow-hidden rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] border border-white/10 bg-black transition-all duration-500">
-                <img id="fs-img" src="https://telegra.ph/file/default.jpg" class="absolute inset-0 w-full h-full object-cover z-10 transition-opacity duration-500">
+
+            <div id="media-container" class="relative w-full max-w-[320px] aspect-video sm:aspect-square mb-10 group overflow-hidden rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] border border-white/10 bg-[#0a0a0a] transition-all duration-500 flex items-center justify-center">
+                <i class="fa-solid fa-compact-disc text-6xl text-gray-800 absolute z-0 animate-spin-slow"></i>
+                <img id="fs-img" src="" class="absolute inset-0 w-full h-full object-cover z-10 opacity-0 transition-opacity duration-500">
                 <div id="yt-video-player" class="absolute inset-0 w-full h-full z-20 opacity-0 pointer-events-none transition-opacity duration-500"></div>
             </div>
 
             <div class="w-full flex justify-between items-end mb-8">
                 <div class="overflow-hidden pr-4 flex-1">
-                    <h2 id="fs-title" class="text-3xl font-black text-white truncate tracking-tight drop-shadow-md">Yuki Matrix</h2>
-                    <p id="fs-artist" class="text-base text-gray-400 mt-1.5 font-medium truncate">System Ready</p>
+                    <h2 id="fs-title" class="text-3xl font-black text-white truncate tracking-tight drop-shadow-md">No Track</h2>
+                    <p id="fs-artist" class="text-base text-gray-500 mt-1.5 font-medium truncate">Waiting for input...</p>
                 </div>
-                <i class="fa-regular fa-heart text-3xl text-gray-500 hover:text-purple-400 transition-all cursor-pointer mb-1"></i>
+                <i class="fa-regular fa-heart text-3xl text-gray-700 transition-all cursor-pointer mb-1"></i>
             </div>
 
             <div class="w-full mb-8 group">
@@ -157,13 +161,13 @@
             </div>
 
             <div class="w-full max-w-[300px] flex items-center justify-between px-2 mb-12">
-                <i class="fa-solid fa-shuffle text-xl text-gray-500"></i>
-                <i id="prev-btn" onclick="playPrev()" class="fa-solid fa-backward-step text-4xl text-white active:scale-90 cursor-pointer"></i>
-                <div id="play-pause-btn" class="w-[85px] h-[85px] bg-white rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.3)] cursor-pointer active:scale-95 transition-transform">
-                    <i id="play-icon" class="fa-solid fa-play text-3xl text-black ml-1"></i>
+                <i class="fa-solid fa-shuffle text-xl text-gray-700"></i>
+                <i id="prev-btn" onclick="playPrev()" class="fa-solid fa-backward-step text-4xl text-gray-600 cursor-pointer"></i>
+                <div id="play-pause-btn" class="w-[85px] h-[85px] bg-gray-800 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(0,0,0,0.3)] cursor-pointer transition-transform">
+                    <i id="play-icon" class="fa-solid fa-play text-3xl text-gray-500 ml-1"></i>
                 </div>
-                <i id="next-btn" onclick="playNext()" class="fa-solid fa-forward-step text-4xl text-white active:scale-90 cursor-pointer"></i>
-                <i class="fa-solid fa-repeat text-xl text-gray-500"></i>
+                <i id="next-btn" onclick="playNext()" class="fa-solid fa-forward-step text-4xl text-gray-600 cursor-pointer"></i>
+                <i class="fa-solid fa-repeat text-xl text-gray-700"></i>
             </div>
 
             <div id="player-up-next-section" class="w-full max-w-[400px] bg-white/5 rounded-2xl p-4 border border-white/5 backdrop-blur-md mt-4">
@@ -172,7 +176,7 @@
                     <div class="px-2 py-1 bg-white/10 rounded text-[9px] text-gray-300 tracking-wider">AUTO-RADIO ON</div>
                 </div>
                 <ul id="player-queue-list" class="space-y-3">
-                    </ul>
+                </ul>
             </div>
 
         </div>
@@ -186,8 +190,10 @@
 
     <audio id="audio-engine"></audio>
 
-    <script src="audio.js?v=8"></script> 
     <script src="player.js?v=8"></script>
+    
+    <script src="audio.js?v=8"></script> 
+    
     <script src="api.js?v=8"></script>
 
 </body>
