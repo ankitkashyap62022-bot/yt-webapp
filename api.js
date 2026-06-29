@@ -1,5 +1,5 @@
 // ==========================================
-// 🧠 YUKI MATRIX - THE BRAIN (API ENGINE)
+// 🧠 YUKI MATRIX - THE ULTIMATE API ENGINE
 // ==========================================
 
 // API URLs
@@ -11,9 +11,9 @@ const searchInput = document.getElementById('search-input');
 const searchResults = document.getElementById('search-results');
 const apiSwitch = document.getElementById('api-switch'); // Toggle Switch
 
-// 🛑 Debounce Logic (Spam rokne ke liye - jab typing band hogi tabhi search karega)
+// 🛑 Debounce Logic (Spam rokne ke liye)
 let typingTimer;
-const typingDelay = 600; // 0.6 seconds delay
+const typingDelay = 600; 
 
 searchInput.addEventListener('input', () => {
     clearTimeout(typingTimer);
@@ -22,7 +22,7 @@ searchInput.addEventListener('input', () => {
     if (query.length > 0) {
         typingTimer = setTimeout(() => fetchSongs(query), typingDelay);
     } else {
-        searchResults.innerHTML = ''; // Box khali hone par result clear
+        searchResults.innerHTML = ''; 
     }
 });
 
@@ -32,10 +32,10 @@ async function fetchSongs(query) {
     searchResults.innerHTML = `
         <li class="flex flex-col items-center justify-center py-8">
             <i class="fa-solid fa-circle-notch fa-spin text-3xl text-cyan-400 mb-3 drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]"></i>
-            <span class="text-xs text-gray-400 tracking-widest uppercase">ꜱᴇᴀʀᴄʜɪɴɢ...</span>
+            <span class="text-xs text-gray-400 tracking-widest uppercase">ꜱᴇᴀʀᴄʜɪɴɢ ᴍᴀᴛʀɪx...</span>
         </li>`;
 
-    const isYouTube = apiSwitch.checked; // Check karo switch kahan hai
+    const isYouTube = apiSwitch.checked; 
 
     if (!isYouTube) {
         // 🥇 JIOSAAVN SEARCH ENGINE
@@ -44,144 +44,102 @@ async function fetchSongs(query) {
             const data = await res.json();
 
             if (data.success && data.data.results.length > 0) {
-                renderSongs(data.data.results, 'jiosaavn');
+                renderAndQueueSongs(data.data.results, 'jiosaavn');
             } else {
                 showError("ᴋᴜᴄʜ ɴᴀʜɪ ᴍɪʟᴀ ʙᴏꜱꜱ! 🥲");
             }
         } catch (error) {
-            showError("API ᴇʀʀᴏʀ ᴀᴀ ɢᴀʏᴀ! ☠️");
+            showError("JioSaavn API ᴇʀʀᴏʀ ᴀᴀ ɢᴀʏᴀ! ☠️");
             console.error(error);
         }
     } else {
-        // 🥈 YOUTUBE SEARCH ENGINE (TERA APNA RAILWAY SERVER) 💀🔥
+        // 🥈 YOUTUBE SEARCH ENGINE (RAILWAY SERVER) 💀🔥
         try {
             const targetUrl = `${YT_RAILWAY_API}/search?query=${encodeURIComponent(query)}`;
-            
             const res = await fetch(targetUrl); 
 
-            // Agar API ne error diya toh text format me read karenge
             if (!res.ok) {
                 const errText = await res.text();
                 throw new Error(`Server ${res.status}: ${errText.substring(0, 30)}`);
             }
 
-            // JSON parse karna
             const data = await res.json();
 
-            // YT ka data render karna (Tere Python backend se 'results' list aayegi)
             if (data.status === "success" && data.results && data.results.length > 0) {
-                renderYTSongs(data.results);
+                renderAndQueueSongs(data.results, 'youtube');
             } else {
-                showError("ʏᴏᴜᴛᴜʙᴇ ᴘᴀʀ ᴋᴜᴄʜ ɴᴀʜɪ ᴍɪʟᴀ ʙᴏꜱꜱ! 🥲 (Empty Data)");
+                showError("ʏᴏᴜᴛᴜʙᴇ ᴘᴀʀ ᴋᴜᴄʜ ɴᴀʜɪ ᴍɪʟᴀ ʙᴏꜱꜱ! 🥲");
             }
         } catch (error) {
-            // 📱 Ab exact reason pata chalega
             showError(`⚠️ ᴇʀʀᴏʀ: ${error.name} - ${error.message}`);
         }
     }
 }
 
-// 🎨 Render JioSaavn Songs on UI
-function renderSongs(songs, platform) {
-    searchResults.innerHTML = ''; // Loading hatao
+// 🎨 Render & Prepare Queue Data
+function renderAndQueueSongs(songs, platform) {
+    searchResults.innerHTML = ''; 
+    
+    // 1. Array banayenge jo player.js ko samjh aaye
+    let formattedPlaylist = [];
 
-    songs.forEach(song => {
-        let title = song.name;
-        let artist = song.artists && song.artists.primary.length > 0 ? song.artists.primary[0].name : "Unknown Artist";
+    songs.forEach((song, index) => {
+        let title, artist, imgUrl, audioUrl, iconClass, borderHoverClass;
 
-        let imgUrl = "https://telegra.ph/file/default.jpg";
-        if (song.image && song.image.length > 0) {
-            imgUrl = song.image[song.image.length - 1].url; 
+        if (platform === 'jiosaavn') {
+            title = song.name;
+            artist = song.artists?.primary?.length > 0 ? song.artists.primary[0].name : "Unknown Artist";
+            imgUrl = song.image?.length > 0 ? song.image[song.image.length - 1].url : "https://telegra.ph/file/default.jpg";
+            audioUrl = song.downloadUrl?.length > 0 ? song.downloadUrl[song.downloadUrl.length - 1].url : "";
+            iconClass = "fa-solid fa-play text-gray-500 p-2 group-hover:text-cyan-400 transition-colors shadow-cyan";
+            borderHoverClass = "hover:border-purple-500";
+        } else {
+            // YouTube (Railway)
+            title = song.title || "Unknown Title"; 
+            artist = song.channel || "YouTube"; 
+            imgUrl = song.thumbnail || "https://telegra.ph/file/default.jpg";
+            audioUrl = `${YT_RAILWAY_API}/stream/${song.id}?type=audio`;
+            iconClass = "fa-brands fa-youtube text-gray-500 p-2 group-hover:text-red-500 transition-colors drop-shadow-md";
+            borderHoverClass = "hover:border-red-500";
         }
 
-        let audioUrl = "";
-        if (song.downloadUrl && song.downloadUrl.length > 0) {
-            audioUrl = song.downloadUrl[song.downloadUrl.length - 1].url;
-        }
+        // 2. Playlist me add karna
+        formattedPlaylist.push({
+            name: title,
+            artist: artist,
+            image: imgUrl,
+            url: audioUrl
+        });
 
+        // 3. UI me HTML element banana (Tera Tailwind Design)
         const li = document.createElement('li');
-        li.className = "flex items-center justify-between p-2.5 hover:bg-white/5 rounded-xl transition cursor-pointer border border-transparent hover:border-gray-800 group";
+        li.className = `flex items-center justify-between p-2.5 hover:bg-white/5 rounded-xl transition cursor-pointer border border-transparent ${borderHoverClass} group`;
         li.innerHTML = `
             <div class="flex items-center space-x-3.5 w-[85%]">
-                <img src="${imgUrl}" class="w-12 h-12 rounded-lg object-cover shadow-md border border-gray-700 group-hover:border-purple-500 transition-colors">
+                <img src="${imgUrl}" class="w-12 h-12 rounded-lg object-cover shadow-md border border-gray-700 transition-colors">
                 <div class="truncate">
                     <h3 class="text-white text-sm font-bold truncate w-full tracking-wide">${title}</h3>
                     <p class="text-[11px] text-gray-400 mt-0.5 truncate">${artist}</p>
                 </div>
             </div>
-            <i class="fa-solid fa-play text-gray-500 p-2 group-hover:text-cyan-400 transition-colors shadow-cyan"></i>
+            <i class="${iconClass}"></i>
         `;
 
+        // 4. Click karne par Player ko Queue bhejna
         li.addEventListener('click', () => {
-            loadAndPlaySong(title, artist, imgUrl, audioUrl);
+            // Ye line seedha player.js se baat karegi
+            if (typeof setQueueAndPlay === "function") {
+                setQueueAndPlay(formattedPlaylist, index);
+            } else {
+                console.error("player.js ka setQueueAndPlay() nahi mila!");
+            }
         });
 
         searchResults.appendChild(li);
     });
 }
 
-// 🎨 Render YouTube (Railway API) Songs on UI
-function renderYTSongs(songs) {
-    searchResults.innerHTML = ''; // Loading hatao
-
-    songs.forEach(song => {
-        let title = song.title || "Unknown Title"; 
-        let artist = song.channel || "YouTube"; 
-        let imgUrl = song.thumbnail || "https://telegra.ph/file/default.jpg";
-        
-        // 🚀 CRITICAL: Direct tere Railway server ke stream endpoint ko hit karega!
-        let audioUrl = `${YT_RAILWAY_API}/stream/${song.id}?type=audio`;
-
-        const li = document.createElement('li');
-        li.className = "flex items-center justify-between p-2.5 hover:bg-white/5 rounded-xl transition cursor-pointer border border-transparent hover:border-red-900 group";
-        li.innerHTML = `
-            <div class="flex items-center space-x-3.5 w-[85%]">
-                <img src="${imgUrl}" class="w-12 h-12 rounded-lg object-cover shadow-md border border-gray-700 group-hover:border-red-500 transition-colors">
-                <div class="truncate">
-                    <h3 class="text-white text-sm font-bold truncate w-full tracking-wide">${title}</h3>
-                    <p class="text-[11px] text-gray-400 mt-0.5 truncate">${artist}</p>
-                </div>
-            </div>
-            <i class="fa-brands fa-youtube text-gray-500 p-2 group-hover:text-red-500 transition-colors drop-shadow-md"></i>
-        `;
-
-        li.addEventListener('click', () => {
-            loadAndPlaySong(title, artist, imgUrl, audioUrl);
-        });
-
-        searchResults.appendChild(li);
-    });
-}
-
+// Error UI
 function showError(msg) {
     searchResults.innerHTML = `<li class="text-center text-red-500 text-xs py-4 tracking-widest font-bold">${msg}</li>`;
-}
-
-// 🎧 PLAYER LINKER (API se data uthakar Player me dalna)
-function loadAndPlaySong(title, artist, img, audioLink) {
-    // 1. Haptic Feedback
-    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.HapticFeedback) {
-        window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
-    }
-
-    // 2. UI Updates (Mini Player & Full Player)
-    document.getElementById('mini-title').innerText = title;
-    document.getElementById('mini-artist').innerText = artist;
-    document.getElementById('mini-cover').src = img;
-
-    document.getElementById('player-title').innerText = title;
-    document.getElementById('player-artist').innerText = artist;
-    document.getElementById('player-cover').src = img;
-
-    // 3. Audio Engine Start
-    const audioEngine = document.getElementById('audio-engine');
-    audioEngine.src = audioLink;
-    audioEngine.play();
-
-    // 4. Update Play/Pause Buttons 
-    document.getElementById('play-icon').className = 'fa-solid fa-pause text-2xl text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400 ml-1';
-    document.getElementById('mini-play-btn').className = 'fa-solid fa-pause text-white text-lg';
-
-    // Global variable update 
-    if(typeof isPlaying !== 'undefined') isPlaying = true;
 }
