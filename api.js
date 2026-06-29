@@ -53,19 +53,24 @@ async function fetchSongs(query) {
             console.error(error);
         }
     } else {
-        // 🥈 YOUTUBE SEARCH ENGINE (SHRUTI API LINKED + CORS PROXY FIX)
+        // 🥈 YOUTUBE SEARCH ENGINE (SHRUTI API LINKED + ADVANCED CORS PROXY)
         try {
             // 1. Tera asli Shruti API URL
             const targetUrl = `https://api.shrutibots.site/search?query=${encodeURIComponent(query)}&api_key=${YT_SHRUTI_KEY}`;
             
-            // 🚀 2. FIX: Browser CORS block ko bypass karne ke liye Proxy URL laga diya
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+            // 🚀 2. FIX: Naya aur jyada powerful proxy (corsproxy.io)
+            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
             
-            // 3. Ab request proxy ke through jayegi
+            // 3. Request bhej rahe hain...
             const res = await fetch(proxyUrl); 
             
-            if (!res.ok) throw new Error(`Server/Proxy ne ${res.status} error diya!`);
+            // Agar API ne error diya toh text format me read karenge
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(`Server ${res.status}: ${errText.substring(0, 30)}`);
+            }
             
+            // JSON parse karna
             const data = await res.json();
 
             // YT ka data render karna
@@ -77,7 +82,8 @@ async function fetchSongs(query) {
                 showError("ʏᴏᴜᴛᴜʙᴇ ᴘᴀʀ ᴋᴜᴄʜ ɴᴀʜɪ ᴍɪʟᴀ ʙᴏꜱꜱ! 🥲 (Empty Data)");
             }
         } catch (error) {
-            showError(`⚠️ ᴇʀʀᴏʀ: ${error.message}`);
+            // 📱 Ab exact reason pata chalega (TypeError mtlb Network/Proxy block)
+            showError(`⚠️ ᴇʀʀᴏʀ: ${error.name} - ${error.message}`);
         }
     }
 }
