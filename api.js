@@ -2,9 +2,9 @@
 // 🧠 YUKI MATRIX - THE BRAIN (API ENGINE)
 // ==========================================
 
-// API URLs & Keys 
+// API URLs
 const JIOSAAVN_API = "https://jiosavan-lilac.vercel.app/api/search/songs?query=";
-const YT_SHRUTI_KEY = "ShrutiBotshf6Os7VvDAm6M3JeJX36";
+const YT_RAILWAY_API = "https://worker-production-1ef8.up.railway.app"; // 🚀 TERA APNA ROOT SERVER
 
 // UI Elements
 const searchInput = document.getElementById('search-input');
@@ -53,36 +53,29 @@ async function fetchSongs(query) {
             console.error(error);
         }
     } else {
-        // 🥈 YOUTUBE SEARCH ENGINE (SHRUTI API LINKED + ADVANCED CORS PROXY)
+        // 🥈 YOUTUBE SEARCH ENGINE (TERA APNA RAILWAY SERVER) 💀🔥
         try {
-            // 1. Tera asli Shruti API URL
-            const targetUrl = `https://api.shrutibots.site/search?query=${encodeURIComponent(query)}&api_key=${YT_SHRUTI_KEY}`;
+            const targetUrl = `${YT_RAILWAY_API}/search?query=${encodeURIComponent(query)}`;
             
-            // 🚀 2. FIX: Naya aur jyada powerful proxy (corsproxy.io)
-            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
-            
-            // 3. Request bhej rahe hain...
-            const res = await fetch(proxyUrl); 
-            
+            const res = await fetch(targetUrl); 
+
             // Agar API ne error diya toh text format me read karenge
             if (!res.ok) {
                 const errText = await res.text();
                 throw new Error(`Server ${res.status}: ${errText.substring(0, 30)}`);
             }
-            
+
             // JSON parse karna
             const data = await res.json();
 
-            // YT ka data render karna
-            const resultsList = data.results || data.data || data;
-
-            if (resultsList && resultsList.length > 0) {
-                renderYTSongs(resultsList);
+            // YT ka data render karna (Tere Python backend se 'results' list aayegi)
+            if (data.status === "success" && data.results && data.results.length > 0) {
+                renderYTSongs(data.results);
             } else {
                 showError("ʏᴏᴜᴛᴜʙᴇ ᴘᴀʀ ᴋᴜᴄʜ ɴᴀʜɪ ᴍɪʟᴀ ʙᴏꜱꜱ! 🥲 (Empty Data)");
             }
         } catch (error) {
-            // 📱 Ab exact reason pata chalega (TypeError mtlb Network/Proxy block)
+            // 📱 Ab exact reason pata chalega
             showError(`⚠️ ᴇʀʀᴏʀ: ${error.name} - ${error.message}`);
         }
     }
@@ -127,15 +120,17 @@ function renderSongs(songs, platform) {
     });
 }
 
-// 🎨 Render YouTube (Shruti API) Songs on UI
+// 🎨 Render YouTube (Railway API) Songs on UI
 function renderYTSongs(songs) {
     searchResults.innerHTML = ''; // Loading hatao
 
     songs.forEach(song => {
         let title = song.title || "Unknown Title"; 
-        let artist = song.channel || song.artist || "YouTube"; 
-        let imgUrl = song.thumbnail || song.image || "https://telegra.ph/file/default.jpg";
-        let audioUrl = song.url || song.streamUrl || song.downloadUrl;
+        let artist = song.channel || "YouTube"; 
+        let imgUrl = song.thumbnail || "https://telegra.ph/file/default.jpg";
+        
+        // 🚀 CRITICAL: Direct tere Railway server ke stream endpoint ko hit karega!
+        let audioUrl = `${YT_RAILWAY_API}/stream/${song.id}?type=audio`;
 
         const li = document.createElement('li');
         li.className = "flex items-center justify-between p-2.5 hover:bg-white/5 rounded-xl transition cursor-pointer border border-transparent hover:border-red-900 group";
