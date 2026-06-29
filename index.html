@@ -3,195 +3,454 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>YUKI Advanced YT Engine</title>
-    <!-- Telegram WebApp JS -->
+    <title>YUKI Music - Premium Neon Edition</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- YouTube IFrame API -->
-    <script src="https://www.youtube.com/iframe_api"></script>
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* 🎨 ADVANCED GLASSMORPHISM UI */
+        /* 🎨 YUKI NEON PREMIUM UI (Spotify Inspired) */
         :root {
-            --bg-color: var(--tg-theme-bg-color, #121212);
-            --text-color: var(--tg-theme-text-color, #ffffff);
-            --btn-color: var(--tg-theme-button-color, #6200ea);
-            --btn-text: var(--tg-theme-button-text-color, #ffffff);
+            --bg-dark: #000000;
+            --bg-card: #121212;
+            --bg-elevated: #282828;
+            --neon-primary: #00f3ff; /* Cyan */
+            --neon-secondary: #ff007f; /* Pink */
+            --text-main: #ffffff;
+            --text-sub: #b3b3b3;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: all 0.3s ease;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            padding-bottom: 140px; /* Space for player + nav */
+            overflow-x: hidden;
         }
 
+        /* 👑 YUKI Branding Header */
         .header {
-            text-align: center;
-            margin-bottom: 20px;
+            padding: 20px 15px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
+            z-index: 100;
         }
 
         .header h1 {
             font-size: 24px;
-            margin: 0;
-            background: linear-gradient(90deg, #ff007f, #6200ea);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: #fff;
+            text-shadow: 0 0 10px var(--neon-secondary), 0 0 20px var(--neon-secondary);
+            animation: pulse 2s infinite;
         }
 
-        .header p {
-            font-size: 12px;
-            opacity: 0.7;
+        @keyframes pulse {
+            0% { text-shadow: 0 0 5px var(--neon-secondary); }
+            50% { text-shadow: 0 0 20px var(--neon-secondary), 0 0 30px var(--neon-secondary); }
+            100% { text-shadow: 0 0 5px var(--neon-secondary); }
         }
 
-        /* Glassmorphism Card */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 20px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-        }
+        /* 📱 Views (Home & Search) */
+        .view { display: none; padding: 0 15px; }
+        .view.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .input-group {
-            display: flex;
-            flex-direction: column;
+        /* 🎵 Home Screen: Grid (Recently Played) */
+        .section-title { font-size: 18px; font-weight: 700; margin: 20px 0 15px; }
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
+        }
+        .grid-item {
+            background-color: var(--bg-elevated);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            box-shadow: 0 0 5px rgba(0, 243, 255, 0.1);
+            transition: 0.2s;
+        }
+        .grid-item:active { background-color: #333; transform: scale(0.98); }
+        .grid-item img { width: 55px; height: 55px; object-fit: cover; }
+        .grid-item span { padding: 0 10px; font-size: 13px; font-weight: 600; }
+
+        /* 🎵 Home Screen: Horizontal Scroll */
+        .scroll-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 15px;
+            padding-bottom: 10px;
+            scroll-snap-type: x mandatory;
+        }
+        .scroll-container::-webkit-scrollbar { display: none; }
+        .card {
+            min-width: 130px;
+            background: var(--bg-card);
+            padding: 10px;
+            border-radius: 8px;
+            scroll-snap-align: start;
+        }
+        .card img {
+            width: 110px;
+            height: 110px;
+            border-radius: 6px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            margin-bottom: 10px;
+        }
+        .card .title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card .sub { font-size: 11px; color: var(--text-sub); margin-top: 4px; }
+
+        /* 🔍 Search View */
+        .search-box {
+            position: relative;
             margin-bottom: 20px;
         }
-
-        input {
-            width: 90%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(0, 0, 0, 0.2);
-            color: var(--text-color);
-            font-size: 14px;
-            outline: none;
-        }
-
-        button {
-            padding: 12px;
-            border-radius: 8px;
-            border: none;
-            background: var(--btn-color);
-            color: var(--btn-text);
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(98, 0, 234, 0.4);
-            transition: transform 0.2s;
-        }
-
-        button:active {
-            transform: scale(0.95);
-        }
-
-        /* YouTube Player Container */
-        .player-container {
-            position: relative;
+        .search-box input {
             width: 100%;
-            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
-            height: 0;
-            border-radius: 10px;
+            padding: 14px 14px 14px 40px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: #242424;
+            color: white;
+            font-size: 15px;
+            outline: none;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.1);
+        }
+        .search-box input:focus {
+            border-color: var(--neon-primary);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+        }
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-sub);
+        }
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            gap: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .search-result-item img { width: 50px; height: 50px; border-radius: 5px; }
+        .search-info { flex: 1; overflow: hidden; }
+        .search-info .title { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .search-info .artist { font-size: 13px; color: var(--text-sub); margin-top: 4px; }
+
+        /* 🎧 Custom Bottom Player (Spotify Style) */
+        .bottom-player {
+            position: fixed;
+            bottom: 60px; /* Above nav bar */
+            left: 10px;
+            right: 10px;
+            background: #181818;
+            border-radius: 8px;
+            padding: 8px 12px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.9), 0 0 10px rgba(255, 0, 127, 0.3);
+            border: 1px solid rgba(255, 0, 127, 0.2);
+            z-index: 999;
+            display: none; /* Hidden initially */
+        }
+        .player-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .player-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             overflow: hidden;
-            margin-top: 10px;
-            display: none; /* Hidden until played */
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            flex: 1;
+        }
+        .player-left img { width: 40px; height: 40px; border-radius: 5px; }
+        .player-text { overflow: hidden; }
+        .player-title { font-size: 13px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--neon-primary); }
+        .player-artist { font-size: 11px; color: var(--text-sub); }
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: white;
+            font-size: 20px;
+        }
+        /* Neon Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 3px;
+            background: #444;
+            border-radius: 2px;
+            margin-top: 8px;
+            cursor: pointer;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--neon-primary);
+            box-shadow: 0 0 10px var(--neon-primary);
+            transition: width 0.1s linear;
         }
 
-        .player-container iframe {
-            position: absolute;
-            top: 0;
+        /* 📱 Bottom Navigation Bar */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
             left: 0;
             width: 100%;
-            height: 100%;
-            border: none;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(15px);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-top: 1px solid #222;
+            z-index: 1000;
         }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            color: var(--text-sub);
+            font-size: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .nav-item i { font-size: 20px; }
+        .nav-item.active { color: white; text-shadow: 0 0 10px var(--neon-primary); }
+
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>👑 YUKI MATRIX ENGINE</h1>
-        <p>Advanced YouTube Web Player</p>
+        <h1>YUKI MUSIC</h1>
+        <i class="fa-solid fa-gear" style="font-size: 20px; color: var(--text-sub);"></i>
     </div>
 
-    <div class="glass-card">
-        <div class="input-group">
-            <input type="text" id="yt-link" placeholder="Paste YouTube Link or Video ID here..." autocomplete="off">
-            <button onclick="loadVideo()">🚀 Play Video</button>
-        </div>
+    <div id="view-home" class="view active">
+        <h2 class="section-title">Good Evening</h2>
+        <div class="grid-container" id="recent-grid">
+            </div>
 
-        <div class="player-container" id="player-wrapper">
-            <div id="yt-player"></div>
+        <h2 class="section-title">Picked for you</h2>
+        <div class="scroll-container" id="picked-scroll">
+            </div>
+    </div>
+
+    <div id="view-search" class="view">
+        <h2 class="section-title">Search</h2>
+        <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="searchInput" placeholder="What do you want to listen to?" oninput="debounceSearch()">
+        </div>
+        <div id="searchResults">
+            <div style="text-align: center; color: #555; margin-top: 40px; font-size: 14px;">
+                <i class="fa-solid fa-music" style="font-size: 40px; margin-bottom: 10px;"></i><br>
+                Find your favorite songs
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-player" id="player">
+        <div class="player-row">
+            <div class="player-left">
+                <img id="p-img" src="" alt="Cover">
+                <div class="player-text">
+                    <div class="player-title" id="p-title">Song Name</div>
+                    <div class="player-artist" id="p-artist">Artist</div>
+                </div>
+            </div>
+            <div class="player-controls">
+                <i class="fa-solid fa-heart" style="font-size: 16px; color: var(--neon-secondary);"></i>
+                <i class="fa-solid fa-play" id="playPauseBtn" onclick="togglePlay()"></i>
+            </div>
+        </div>
+        <div class="progress-container" onclick="seek(event)">
+            <div class="progress-bar" id="p-bar"></div>
+        </div>
+        <audio id="audioElement"></audio>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchView('home', this)">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </div>
+        <div class="nav-item" onclick="switchView('search', this)">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span>Search</span>
+        </div>
+        <div class="nav-item">
+            <i class="fa-solid fa-book-open"></i>
+            <span>Library</span>
         </div>
     </div>
 
     <script>
-        // 1. Initialize Telegram WebApp
+        // Telegram Setup
         let tg = window.Telegram.WebApp;
-        tg.expand(); // Open in full screen
+        tg.expand();
         tg.ready();
+        tg.setHeaderColor('#000000');
 
-        let player;
+        // Core Elements
+        const audio = document.getElementById('audioElement');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const progressBar = document.getElementById('p-bar');
+        const playerUI = document.getElementById('player');
+        let searchTimeout;
 
-        // 2. YouTube IFrame API Initialization
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('yt-player', {
-                height: '100%',
-                width: '100%',
-                videoId: '', // Starts empty
-                playerVars: {
-                    'playsinline': 1,
-                    'autoplay': 1,
-                    'rel': 0 // Prevents random recommendations at the end
-                }
+        // Dummy Data for Home Screen (To look like a real app)
+        const dummyData = [
+            { title: "Karan Aujla Hits", img: "https://i.scdn.co/image/ab6761610000e5ebb6b93dcbe567a5b3f07a2107" },
+            { title: "Desi Hip Hop", img: "https://i.scdn.co/image/ab67706f00000002b8d0eeefecb9549df0c34eef" },
+            { title: "Arijit Singh", img: "https://i.scdn.co/image/ab6761610000e5eb0261696c5df3be99da6ed3f3" },
+            { title: "Punjabi 101", img: "https://i.scdn.co/image/ab67706f000000021ce43f11d1eb977507ebf0ad" },
+            { title: "Bollywood Mush", img: "https://i.scdn.co/image/ab67706f000000028711bd4047b7194858f9fcbc" },
+            { title: "Global Top 50", img: "https://i.scdn.co/image/ab67706f000000029249b35f23fb596b8f006a16" }
+        ];
+
+        // Load Home Data
+        function loadHome() {
+            const grid = document.getElementById('recent-grid');
+            const scroll = document.getElementById('picked-scroll');
+            
+            // Populate 6 grid items
+            dummyData.forEach(item => {
+                grid.innerHTML += `<div class="grid-item" onclick="switchView('search', document.querySelectorAll('.nav-item')[1])"><img src="${item.img}"><span>${item.title}</span></div>`;
+            });
+
+            // Populate scroll items
+            dummyData.reverse().forEach(item => {
+                scroll.innerHTML += `<div class="card" onclick="switchView('search', document.querySelectorAll('.nav-item')[1])"><img src="${item.img}"><div class="title">${item.title}</div><div class="sub">Yuki Recommendations</div></div>`;
             });
         }
+        loadHome();
 
-        // 3. Extract Video ID from URL
-        function extractVideoID(url) {
-            let regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-            let match = url.match(regExp);
-            if (match && match[2].length === 11) {
-                return match[2];
-            } else if (url.length === 11) {
-                return url; // If user directly pastes the 11-digit ID
-            }
-            return null;
-        }
-
-        // 4. Play Button Logic
-        function loadVideo() {
-            tg.HapticFeedback.impactOccurred('medium'); // Phone vibration feature!
+        // Navigation Logic
+        function switchView(viewId, el) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById('view-' + viewId).classList.add('active');
             
-            let inputUrl = document.getElementById('yt-link').value;
-            let videoId = extractVideoID(inputUrl);
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+            
+            if(viewId === 'search') document.getElementById('searchInput').focus();
+        }
 
-            if (videoId) {
-                document.getElementById('player-wrapper').style.display = 'block';
-                player.loadVideoById(videoId);
+        // Search Logic (iTunes API)
+        function debounceSearch() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(fetchResults, 500);
+        }
+
+        async function fetchResults() {
+            const query = document.getElementById('searchInput').value;
+            const resContainer = document.getElementById('searchResults');
+            
+            if (!query) {
+                resContainer.innerHTML = '';
+                return;
+            }
+
+            resContainer.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--neon-primary);"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>';
+
+            try {
+                const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=15`);
+                const data = await res.json();
                 
-                // Change Telegram Main Button
-                tg.MainButton.text = "CLOSE PLAYER";
-                tg.MainButton.show();
-                tg.MainButton.onClick(() => {
-                    tg.close();
+                resContainer.innerHTML = '';
+                if(data.results.length === 0) {
+                    resContainer.innerHTML = '<div style="text-align:center; padding: 20px;">No songs found 😢</div>';
+                    return;
+                }
+
+                data.results.forEach(song => {
+                    // Changing artwork to high quality
+                    let hqImg = song.artworkUrl100.replace('100x100', '300x300');
+                    
+                    let div = document.createElement('div');
+                    div.className = 'search-result-item';
+                    div.onclick = () => playSong(song.previewUrl, song.trackName, song.artistName, hqImg);
+                    div.innerHTML = `
+                        <img src="${hqImg}">
+                        <div class="search-info">
+                            <div class="title">${song.trackName}</div>
+                            <div class="artist">${song.artistName}</div>
+                        </div>
+                        <i class="fa-solid fa-ellipsis-vertical" style="color: #666; padding: 0 10px;"></i>
+                    `;
+                    resContainer.appendChild(div);
                 });
-            } else {
-                tg.showAlert("❌ Invalid YouTube Link! Please check again.");
+            } catch (err) {
+                resContainer.innerHTML = '<div style="text-align:center; padding: 20px; color: red;">Error searching!</div>';
             }
         }
+
+        // Player Logic
+        function playSong(url, title, artist, img) {
+            tg.HapticFeedback.impactOccurred('medium');
+            
+            document.getElementById('p-title').innerText = title;
+            document.getElementById('p-artist').innerText = artist;
+            document.getElementById('p-img').src = img;
+            
+            audio.src = url;
+            audio.play();
+            
+            playerUI.style.display = 'flex';
+            playPauseBtn.className = 'fa-solid fa-pause';
+        }
+
+        function togglePlay() {
+            if(audio.paused) {
+                audio.play();
+                playPauseBtn.className = 'fa-solid fa-pause';
+            } else {
+                audio.pause();
+                playPauseBtn.className = 'fa-solid fa-play';
+            }
+            tg.HapticFeedback.impactOccurred('light');
+        }
+
+        // Custom Progress Bar Update
+        audio.addEventListener('timeupdate', () => {
+            if(audio.duration) {
+                const percent = (audio.currentTime / audio.duration) * 100;
+                progressBar.style.width = percent + '%';
+            }
+        });
+
+        // Seek Audio
+        function seek(e) {
+            const container = e.currentTarget;
+            const clickX = e.offsetX;
+            const width = container.clientWidth;
+            const percent = clickX / width;
+            audio.currentTime = percent * audio.duration;
+        }
+        
+        // Auto Reset when song ends
+        audio.addEventListener('ended', () => {
+            playPauseBtn.className = 'fa-solid fa-play';
+            progressBar.style.width = '0%';
+        });
     </script>
 </body>
 </html>
