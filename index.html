@@ -8,7 +8,8 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="ui.css">
+    <!-- 🛠️ FIX: CSS me Cache buster laga diya -->
+    <link rel="stylesheet" href="ui.css?v=2">
 </head>
 <body class="bg-[#050505] text-gray-200 h-screen flex flex-col overflow-hidden font-sans select-none">
 
@@ -38,16 +39,7 @@
             <h2 class="text-xs text-gray-500 mb-3 ml-1 font-semibold tracking-widest uppercase">ꜱᴇᴀʀᴄʜ ʀᴇꜱᴜʟᴛꜱ</h2>
 
             <ul id="search-results" class="space-y-2">
-                <li class="flex items-center justify-between p-2.5 hover:bg-white/5 rounded-xl transition cursor-pointer border border-transparent hover:border-gray-800">
-                    <div class="flex items-center space-x-3.5">
-                        <img src="https://i.scdn.co/image/ab67616d00001e021a8c4618eaa885af490c6a71" class="w-12 h-12 rounded-lg object-cover shadow-md">
-                        <div>
-                            <h3 class="text-white text-sm font-bold truncate w-44 tracking-wide">ᴛᴜᴍ ʜɪ ʜᴏ</h3>
-                            <p class="text-[11px] text-gray-400 mt-0.5">ᴀʀɪᴊɪᴛ ꜱɪɴɢʜ</p>
-                        </div>
-                    </div>
-                    <i class="fa-solid fa-play text-gray-500 p-2 hover:text-cyan-400 transition"></i>
-                </li>
+                <!-- Search results will load here -->
             </ul>
         </section>
     </main>
@@ -131,9 +123,10 @@
 
     <audio id="audio-engine"></audio>
 
-    <script src="api.js"></script>
-    <script src="player.js"></script>
-    <script src="audio.js"></script> 
+    <!-- 🛠️ FIX: Saari JS files me Cache Buster (?v=2) laga diya -->
+    <script src="api.js?v=2"></script>
+    <script src="player.js?v=2"></script>
+    <script src="audio.js?v=2"></script> 
 
 </body>
 </html>
