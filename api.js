@@ -53,29 +53,30 @@ async function fetchSongs(query) {
             console.error(error);
         }
     } else {
-        // 🥈 YOUTUBE SEARCH ENGINE (SHRUTI API LINKED)
+        // 🥈 YOUTUBE SEARCH ENGINE (SHRUTI API LINKED + CORS PROXY FIX)
         try {
-            // 🛠️ FIX 1: API Key URL ke andar pass kar rahe hain
-            const ytUrl = `https://api.shrutibots.site/search?query=${encodeURIComponent(query)}&api_key=${YT_SHRUTI_KEY}`;
+            // 1. Tera asli Shruti API URL
+            const targetUrl = `https://api.shrutibots.site/search?query=${encodeURIComponent(query)}&api_key=${YT_SHRUTI_KEY}`;
             
-            const res = await fetch(ytUrl); 
+            // 🚀 2. FIX: Browser CORS block ko bypass karne ke liye Proxy URL laga diya
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
             
-            // Agar API server ne mana kar diya (404 ya 403 error)
-            if (!res.ok) throw new Error(`Server ne ${res.status} error diya!`);
+            // 3. Ab request proxy ke through jayegi
+            const res = await fetch(proxyUrl); 
+            
+            if (!res.ok) throw new Error(`Server/Proxy ne ${res.status} error diya!`);
             
             const data = await res.json();
 
-            // 🛠️ FIX 2: Alag-alag API alag naam se data bhejti hain
+            // YT ka data render karna
             const resultsList = data.results || data.data || data;
 
-            // YT ka data render karna 
             if (resultsList && resultsList.length > 0) {
                 renderYTSongs(resultsList);
             } else {
                 showError("ʏᴏᴜᴛᴜʙᴇ ᴘᴀʀ ᴋᴜᴄʜ ɴᴀʜɪ ᴍɪʟᴀ ʙᴏꜱꜱ! 🥲 (Empty Data)");
             }
         } catch (error) {
-            // 📱 🛠️ MOBILE DEBUGGER: Ab error direct screen par aayega!
             showError(`⚠️ ᴇʀʀᴏʀ: ${error.message}`);
         }
     }
