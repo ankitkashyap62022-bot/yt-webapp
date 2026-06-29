@@ -4,8 +4,6 @@
 
 // API URLs & Keys 
 const JIOSAAVN_API = "https://jiosavan-lilac.vercel.app/api/search/songs?query=";
-// Shruti API Base URL (YouTube Search ke liye)
-const SHRUTI_BASE_URL = "https://api.shrutibots.site/search?query="; 
 const YT_SHRUTI_KEY = "ShrutiBotshf6Os7VvDAm6M3JeJX36";
 
 // UI Elements
@@ -57,22 +55,28 @@ async function fetchSongs(query) {
     } else {
         // 🥈 YOUTUBE SEARCH ENGINE (SHRUTI API LINKED)
         try {
-            const res = await fetch(SHRUTI_BASE_URL + encodeURIComponent(query), {
-                headers: {
-                    "Authorization": YT_SHRUTI_KEY 
-                }
-            });
+            // 🛠️ FIX 1: API Key URL ke andar pass kar rahe hain
+            const ytUrl = `https://api.shrutibots.site/search?query=${encodeURIComponent(query)}&api_key=${YT_SHRUTI_KEY}`;
+            
+            const res = await fetch(ytUrl); 
+            
+            // Agar API server ne mana kar diya (404 ya 403 error)
+            if (!res.ok) throw new Error(`Server ne ${res.status} error diya!`);
+            
             const data = await res.json();
 
+            // 🛠️ FIX 2: Alag-alag API alag naam se data bhejti hain
+            const resultsList = data.results || data.data || data;
+
             // YT ka data render karna 
-            if (data && data.results && data.results.length > 0) {
-                renderYTSongs(data.results);
+            if (resultsList && resultsList.length > 0) {
+                renderYTSongs(resultsList);
             } else {
-                showError("ʏᴏᴜᴛᴜʙᴇ ᴘᴀʀ ᴋᴜᴄʜ ɴᴀʜɪ ᴍɪʟᴀ ʙᴏꜱꜱ! 🥲");
+                showError("ʏᴏᴜᴛᴜʙᴇ ᴘᴀʀ ᴋᴜᴄʜ ɴᴀʜɪ ᴍɪʟᴀ ʙᴏꜱꜱ! 🥲 (Empty Data)");
             }
         } catch (error) {
-            showError("ʏᴏᴜᴛᴜʙᴇ API ᴇʀʀᴏʀ ᴀᴀ ɢᴀʏᴀ! ☠️");
-            console.error(error);
+            // 📱 🛠️ MOBILE DEBUGGER: Ab error direct screen par aayega!
+            showError(`⚠️ ᴇʀʀᴏʀ: ${error.message}`);
         }
     }
 }
@@ -148,7 +152,7 @@ function renderYTSongs(songs) {
 }
 
 function showError(msg) {
-    searchResults.innerHTML = `<li class="text-center text-gray-500 text-xs py-4 tracking-widest">${msg}</li>`;
+    searchResults.innerHTML = `<li class="text-center text-red-500 text-xs py-4 tracking-widest font-bold">${msg}</li>`;
 }
 
 // 🎧 PLAYER LINKER (API se data uthakar Player me dalna)
