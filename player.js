@@ -1,8 +1,8 @@
 // ==========================================
-// 🚀 YUKI MATRIX - PRO PLAYER ENGINE 4.1 (CRASH-PROOF & SAFE MODE)
+// 🚀 YUKI MATRIX - PRO PLAYER ENGINE 4.2 (ANTI-CRASH & CACHE BYPASS)
 // ==========================================
 
-// 🛡️ 1. SAFE TELEGRAM INITIALIZATION (Browser Crash Fix)
+// 🛡️ 1. SAFE TELEGRAM INITIALIZATION (Browser & Bot Safe)
 const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 try {
     if (tg && tg.expand) tg.expand();
@@ -17,7 +17,7 @@ function triggerHaptic(style = 'light') {
     } catch(e) {}
 }
 
-// 🎛️ UI Elements Fetch (Safe Mode)
+// 🎛️ UI Elements Fetch
 const miniPlayer = document.getElementById('mini-player');
 const fullPlayer = document.getElementById('full-player');
 const closePlayerBtn = document.getElementById('close-player-btn');
@@ -31,7 +31,9 @@ const miniArtist = document.getElementById('mini-artist');
 
 const bgBlur = document.getElementById('player-bg-blur');
 const sourceLabel = document.getElementById('player-source-label');
-const audioEngine = document.getElementById('audio-engine');
+
+// 🚨 BUG KILLED HERE: Renamed to 'sysAudio' so it doesn't clash with audio.js!
+const sysAudio = document.getElementById('audio-engine');
 
 const playIcon = document.getElementById('play-icon');
 const miniPlayBtnNode = document.getElementById('mini-play-btn');
@@ -44,7 +46,7 @@ let isShuffle = false;
 let isRepeat = false; 
 
 // ==========================================
-// 🎞️ YOUTUBE IFRAME API (VIDEO ENGINE FIX)
+// 🎞️ YOUTUBE IFRAME API (VIDEO ENGINE)
 // ==========================================
 let ytPlayer = null;
 let isYtReady = false;
@@ -168,13 +170,16 @@ function loadSongIntoPlayer() {
         if(currentPlaylist.length === 0) return;
         let song = currentPlaylist[currentIndex];
 
-        // 1. Text & Image Updates (Safe Checks)
+        // 1. Text & Image Updates
         if(fsTitle) fsTitle.innerText = song.name || "Unknown Track";
         if(fsArtist) fsArtist.innerText = song.artist || "Unknown Artist";
         if(miniTitle) miniTitle.innerText = song.name || "Unknown Track";
         if(miniArtist) miniArtist.innerText = song.artist || "Unknown Artist";
-        if(miniImg) miniImg.src = song.image || "https://telegra.ph/file/default.jpg";
-        if(bgBlur) bgBlur.src = song.image || "https://telegra.ph/file/default.jpg";
+        
+        // Handling empty image sources to prevent broken icons
+        const safeImage = song.image && song.image.length > 5 ? song.image : "https://telegra.ph/file/default.jpg";
+        if(miniImg) miniImg.src = safeImage;
+        if(bgBlur) bgBlur.src = safeImage;
 
         const mediaContainer = document.getElementById('media-container');
         const miniProgress = document.getElementById('mini-progress');
@@ -213,7 +218,7 @@ function loadSongIntoPlayer() {
             }
 
             if(fsImage) {
-                fsImage.src = song.image || "https://telegra.ph/file/default.jpg";
+                fsImage.src = safeImage;
                 fsImage.style.opacity = 1; 
             }
 
@@ -221,9 +226,9 @@ function loadSongIntoPlayer() {
         }
 
         // 3. Audio Engine Load
-        if(audioEngine) {
-            audioEngine.src = song.url; 
-            audioEngine.load(); 
+        if(sysAudio) {
+            sysAudio.src = song.url; 
+            sysAudio.load(); 
             playAudio();
         }
 
@@ -243,9 +248,9 @@ function loadSongIntoPlayer() {
 // 🛡️ ADVANCED AUDIO CONTROLS
 // ==========================================
 function playAudio() {
-    if(!audioEngine || !audioEngine.src) return;
+    if(!sysAudio || !sysAudio.src) return;
 
-    audioEngine.play().then(() => {
+    sysAudio.play().then(() => {
         isPlaying = true;
         if(playIcon) playIcon.className = 'fa-solid fa-pause text-3xl text-black ml-1';
         if(miniPlayBtnNode) miniPlayBtnNode.className = 'fa-solid fa-pause text-white text-xl drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]';
@@ -262,7 +267,7 @@ function playAudio() {
 }
 
 function pauseAudio() {
-    if(audioEngine) audioEngine.pause();
+    if(sysAudio) sysAudio.pause();
     isPlaying = false;
     pauseUI();
     if(isYtReady && ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo(); 
@@ -275,7 +280,7 @@ function pauseUI() {
 
 function togglePlay() {
     triggerHaptic('light');
-    if (audioEngine && audioEngine.paused) playAudio();
+    if (sysAudio && sysAudio.paused) playAudio();
     else pauseAudio();
 }
 
@@ -298,8 +303,8 @@ function playNext() {
 
 function playPrev() {
     triggerHaptic('light');
-    if (audioEngine && audioEngine.currentTime > 3) {
-        audioEngine.currentTime = 0; 
+    if (sysAudio && sysAudio.currentTime > 3) {
+        sysAudio.currentTime = 0; 
         if(isYtReady && ytPlayer && ytPlayer.seekTo) ytPlayer.seekTo(0); 
     } else {
         if (currentIndex > 0) currentIndex--;
@@ -308,10 +313,10 @@ function playPrev() {
     }
 }
 
-if(audioEngine) {
-    audioEngine.addEventListener('ended', () => {
+if(sysAudio) {
+    sysAudio.addEventListener('ended', () => {
         if (isRepeat) {
-            audioEngine.currentTime = 0;
+            sysAudio.currentTime = 0;
             if(isYtReady && ytPlayer && ytPlayer.seekTo) ytPlayer.seekTo(0);
             playAudio();
         } else {
@@ -319,15 +324,15 @@ if(audioEngine) {
         }
     });
 
-    audioEngine.addEventListener('error', () => {
+    sysAudio.addEventListener('error', () => {
         console.warn("⚠️ Stream Failed! Skipping to next track...");
         setTimeout(playNext, 1000); 
     });
 
-    audioEngine.addEventListener('waiting', () => {
+    sysAudio.addEventListener('waiting', () => {
         if(playIcon) playIcon.className = 'fa-solid fa-circle-notch fa-spin text-3xl text-black';
     });
-    audioEngine.addEventListener('playing', () => {
+    sysAudio.addEventListener('playing', () => {
         if(playIcon) playIcon.className = 'fa-solid fa-pause text-3xl text-black ml-1';
     });
 }
@@ -342,8 +347,8 @@ function updateMediaSession(song) {
             artist: song.artist || 'Unknown Artist',
             album: song.platform === 'youtube' ? 'YouTube Mix' : 'JioSaavn Mix',
             artwork: [
-                { src: song.image || '', sizes: '96x96', type: 'image/jpeg' },
-                { src: song.image || '', sizes: '512x512', type: 'image/jpeg' }
+                { src: song.image || 'https://telegra.ph/file/default.jpg', sizes: '96x96', type: 'image/jpeg' },
+                { src: song.image || 'https://telegra.ph/file/default.jpg', sizes: '512x512', type: 'image/jpeg' }
             ]
         });
 
