@@ -8,10 +8,8 @@ const YT_RAILWAY_API = "https://worker-production-1ef8.up.railway.app";
 // 🎛️ UI Elements Cache
 const searchInput = document.getElementById('search-input');
 const apiSwitch = document.getElementById('api-switch'); 
-const jiosaavnContainer = document.getElementById('search-results'); // Fixed ID to match index.html
-const youtubeContainer = document.getElementById('search-results'); // Using same container for now, dynamically cleared
+const jiosaavnContainer = document.getElementById('search-results'); 
 const emptyState = document.getElementById('empty-state');
-const skeletonLoader = document.getElementById('loading-skeleton');
 
 // 🕒 History Elements
 const historyContainer = document.getElementById('search-history-container');
@@ -20,7 +18,7 @@ const clearHistoryBtn = document.getElementById('clear-history-btn');
 
 let typingTimer;
 const typingDelay = 500; 
-let currentAbortController = null; // ⚡ Anti-Lag System
+let currentAbortController = null; 
 
 // ==========================================
 // 🚀 INITIALIZATION (TRENDING MATRIX)
@@ -34,10 +32,9 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 function fetchTrendingOnLoad() {
-    // Random trending vibe fetch karega app start hote hi
     const vibes = ["Top 50 India", "Viral Hits", "LoFi Bollywood", "Punjabi Pop"];
     const randomVibe = vibes[Math.floor(Math.random() * vibes.length)];
-    fetchSongs(randomVibe, true); // true means it's a silent background load, no history saved
+    fetchSongs(randomVibe, true); 
 }
 
 // ==========================================
@@ -85,12 +82,9 @@ window.executeHistorySearch = (query) => {
 // ==========================================
 apiSwitch.addEventListener('change', () => {
     let query = searchInput.value.trim();
-    
-    // 🔥 जादू यहाँ है: अगर बॉक्स खाली है, तो खुद ही सर्च मार दो!
     if (query.length === 0) {
         query = apiSwitch.checked ? "Latest YouTube Hits" : "Top 50 JioSaavn";
     }
-    
     fetchSongs(query);
 });
 
@@ -105,8 +99,7 @@ searchInput.addEventListener('input', () => {
         if(jiosaavnContainer) jiosaavnContainer.innerHTML = ''; 
         if(emptyState) emptyState.classList.remove('hidden');
         loadSearchHistory(); 
-        
-        // Agar clear kiya box, to wapas trending la do
+
         const defaultQuery = apiSwitch.checked ? "Latest YouTube Hits" : "Top 50 JioSaavn";
         fetchSongs(defaultQuery, true); 
     }
@@ -122,10 +115,8 @@ async function fetchSongs(query, isSilentLoad = false) {
     currentAbortController = new AbortController();
     const signal = currentAbortController.signal;
 
-    // UI States
     if(historyContainer) historyContainer.classList.add('hidden'); 
-    
-    // Simple Loader logic for index.html compatibility
+
     if(jiosaavnContainer) {
         jiosaavnContainer.innerHTML = `
         <li class="flex flex-col items-center justify-center py-8">
@@ -162,7 +153,7 @@ async function fetchSongs(query, isSilentLoad = false) {
 }
 
 // ==========================================
-// 🎨 RENDER ENGINE
+// 🎨 RENDER ENGINE (FIXED YOUTUBE BIG CARDS)
 // ==========================================
 function renderAndQueueSongs(songs, platform) {
     if(jiosaavnContainer) jiosaavnContainer.innerHTML = ''; 
@@ -174,8 +165,6 @@ function renderAndQueueSongs(songs, platform) {
         let artist = platform === 'jiosaavn' ? (song.artists?.primary?.length > 0 ? song.artists.primary[0].name : "Unknown") : (song.channel || "YouTube");
         let imgUrl = platform === 'jiosaavn' ? (song.image?.length > 0 ? song.image[song.image.length - 1].url : "https://telegra.ph/file/default.jpg") : (song.thumbnail || "https://telegra.ph/file/default.jpg");
         let audioUrl = platform === 'jiosaavn' ? (song.downloadUrl?.length > 0 ? song.downloadUrl[song.downloadUrl.length - 1].url : "") : `${YT_RAILWAY_API}/stream/${song.id}?type=audio`;
-
-        // 🎞️ EXTREMELY IMPORTANT FOR NEXT STEP: Video ID Extraction
         let videoId = platform === 'youtube' ? song.id : null;
 
         formattedPlaylist.push({ 
@@ -187,9 +176,11 @@ function renderAndQueueSongs(songs, platform) {
             videoId: videoId 
         });
 
+        const li = document.createElement('li');
+
         if (platform === 'jiosaavn') {
-            const li = document.createElement('li');
-            li.className = `flex items-center justify-between p-2.5 hover:bg-white/5 rounded-xl transition cursor-pointer border border-transparent hover:border-purple-500 group`;
+            // 🎶 JIOSAAVN COMPACT UI
+            li.className = `flex items-center justify-between p-2.5 hover:bg-white/5 rounded-xl transition cursor-pointer border border-transparent hover:border-cyan-500/50 group`;
             li.innerHTML = `
                 <div class="flex items-center space-x-3.5 w-[85%]">
                     <img src="${imgUrl}" class="w-12 h-12 rounded-lg object-cover shadow-md border border-gray-700 transition-colors">
@@ -200,33 +191,51 @@ function renderAndQueueSongs(songs, platform) {
                 </div>
                 <i class="fa-solid fa-play text-gray-500 p-2 group-hover:text-cyan-400 transition-colors drop-shadow-md"></i>
             `;
-            li.addEventListener('click', () => { 
-                const mode = apiSwitch.checked ? 'video' : 'music';
-                if (typeof switchMode === "function") switchMode(mode);
-                if (typeof setQueueAndPlay === "function") setQueueAndPlay(formattedPlaylist, index); 
-            });
-            if(jiosaavnContainer) jiosaavnContainer.appendChild(li);
-
         } else {
-            const li = document.createElement('li');
-            li.className = `flex items-center justify-between p-2.5 hover:bg-white/5 rounded-xl transition cursor-pointer border border-transparent hover:border-red-500 group`;
+            // 📺 YOUTUBE BIG CARD UI (FIXED)
+            li.className = `flex flex-col w-full p-2.5 bg-black/40 hover:bg-[#121212] rounded-2xl transition-all cursor-pointer border border-white/5 hover:border-red-500/40 group mb-3 shadow-lg`;
             li.innerHTML = `
-                <div class="flex items-center space-x-3.5 w-[85%]">
-                    <img src="${imgUrl}" class="w-12 h-12 rounded-lg object-cover shadow-md border border-gray-700 transition-colors">
-                    <div class="truncate">
-                        <h3 class="text-white text-sm font-bold truncate w-full tracking-wide">${title}</h3>
-                        <p class="text-[11px] text-gray-400 mt-0.5 truncate flex items-center"><i class="fa-brands fa-youtube text-red-500 mr-1"></i> ${artist}</p>
+                <div class="relative w-full aspect-video rounded-xl overflow-hidden mb-3 shadow-[0_5px_15px_rgba(0,0,0,0.5)]">
+                    <img src="${imgUrl}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                    
+                    <div class="absolute top-2 right-2 bg-black/70 backdrop-blur-md px-2 py-1 rounded-md border border-white/10 flex items-center">
+                        <i class="fa-brands fa-youtube text-red-500 text-[10px] mr-1.5"></i>
+                        <span class="text-[9px] text-white font-bold tracking-widest">VIDEO</span>
+                    </div>
+
+                    <div class="absolute inset-0 bg-black/10 group-hover:bg-black/50 transition-colors flex items-center justify-center">
+                        <div class="w-14 h-14 bg-red-600/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 drop-shadow-[0_0_20px_rgba(220,38,38,0.8)] scale-75 group-hover:scale-100">
+                            <i class="fa-solid fa-play text-white ml-1 text-xl"></i>
+                        </div>
                     </div>
                 </div>
-                <i class="fa-solid fa-play text-gray-500 p-2 group-hover:text-red-500 transition-colors drop-shadow-md"></i>
+
+                <div class="flex items-start justify-between px-2">
+                    <div class="overflow-hidden pr-3 w-full">
+                        <h3 class="text-white text-sm font-bold truncate w-full tracking-wide">${title}</h3>
+                        <p class="text-[11px] text-gray-400 mt-1 truncate flex items-center">
+                            <i class="fa-solid fa-circle-check text-[10px] text-gray-500 mr-1.5"></i> ${artist}
+                        </p>
+                    </div>
+                </div>
             `;
-            li.addEventListener('click', () => { 
-                const mode = apiSwitch.checked ? 'video' : 'music';
-                if (typeof switchMode === "function") switchMode(mode);
-                if (typeof setQueueAndPlay === "function") setQueueAndPlay(formattedPlaylist, index); 
-            });
-            if(jiosaavnContainer) jiosaavnContainer.appendChild(li); // Using same list container to avoid UI clutter
         }
+
+        // 🚨 FIXED: CLICK EVENT NOW REVEALS MINI PLAYER!
+        li.addEventListener('click', () => { 
+            // 1. Show the Mini Player properly
+            const miniPlayer = document.getElementById('mini-player');
+            if(miniPlayer) {
+                miniPlayer.classList.remove('translate-y-[250%]', 'opacity-0', 'pointer-events-none');
+            }
+
+            // 2. Play the song using player.js engine
+            if (typeof setQueueAndPlay === "function") {
+                setQueueAndPlay(formattedPlaylist, index); 
+            } 
+        });
+
+        if(jiosaavnContainer) jiosaavnContainer.appendChild(li);
     });
 }
 
