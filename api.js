@@ -81,10 +81,16 @@ window.executeHistorySearch = (query) => {
 };
 
 // ==========================================
-// 🚀 MAIN SEARCH CONTROLLER
+// 🚀 MAIN SEARCH CONTROLLER (SMART TOGGLE FIX)
 // ==========================================
 apiSwitch.addEventListener('change', () => {
-    const query = searchInput.value.trim() || "Trending Hits"; // Agar khali hai to trending layega
+    let query = searchInput.value.trim();
+    
+    // 🔥 जादू यहाँ है: अगर बॉक्स खाली है, तो खुद ही सर्च मार दो!
+    if (query.length === 0) {
+        query = apiSwitch.checked ? "Latest YouTube Hits" : "Top 50 JioSaavn";
+    }
+    
     fetchSongs(query);
 });
 
@@ -99,7 +105,10 @@ searchInput.addEventListener('input', () => {
         if(jiosaavnContainer) jiosaavnContainer.innerHTML = ''; 
         if(emptyState) emptyState.classList.remove('hidden');
         loadSearchHistory(); 
-        fetchTrendingOnLoad(); // Khali hone par wapas trending la do
+        
+        // Agar clear kiya box, to wapas trending la do
+        const defaultQuery = apiSwitch.checked ? "Latest YouTube Hits" : "Top 50 JioSaavn";
+        fetchSongs(defaultQuery, true); 
     }
 });
 
