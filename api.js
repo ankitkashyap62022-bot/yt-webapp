@@ -1,5 +1,5 @@
 // ==========================================
-// 🧠 YUKI MATRIX - ADVANCED API ENGINE 3.0 (HISTORY & VIDEO READY)
+// 🧠 YUKI MATRIX - ADVANCED API ENGINE 3.0 (HISTORY, VIDEO & TRENDING READY)
 // ==========================================
 
 const JIOSAAVN_API = "https://jiosavan-lilac.vercel.app/api/search/songs?query=";
@@ -8,8 +8,8 @@ const YT_RAILWAY_API = "https://worker-production-1ef8.up.railway.app";
 // 🎛️ UI Elements Cache
 const searchInput = document.getElementById('search-input');
 const apiSwitch = document.getElementById('api-switch'); 
-const jiosaavnContainer = document.getElementById('jiosaavn-results');
-const youtubeContainer = document.getElementById('youtube-results');
+const jiosaavnContainer = document.getElementById('search-results'); // Fixed ID to match index.html
+const youtubeContainer = document.getElementById('search-results'); // Using same container for now, dynamically cleared
 const emptyState = document.getElementById('empty-state');
 const skeletonLoader = document.getElementById('loading-skeleton');
 
@@ -23,18 +23,36 @@ const typingDelay = 500;
 let currentAbortController = null; // ⚡ Anti-Lag System
 
 // ==========================================
+// 🚀 INITIALIZATION (TRENDING MATRIX)
+// ==========================================
+window.addEventListener('DOMContentLoaded', () => {
+    loadSearchHistory();
+    // No-Search Load: App khulte hi trending gaane laayega
+    if (!searchInput.value) {
+        fetchTrendingOnLoad();
+    }
+});
+
+function fetchTrendingOnLoad() {
+    // Random trending vibe fetch karega app start hote hi
+    const vibes = ["Top 50 India", "Viral Hits", "LoFi Bollywood", "Punjabi Pop"];
+    const randomVibe = vibes[Math.floor(Math.random() * vibes.length)];
+    fetchSongs(randomVibe, true); // true means it's a silent background load, no history saved
+}
+
+// ==========================================
 // 💾 SEARCH HISTORY ENGINE (LOCAL STORAGE)
 // ==========================================
 function loadSearchHistory() {
     let history = JSON.parse(localStorage.getItem('yuki_history')) || [];
-    if (history.length > 0) {
+    if (history.length > 0 && historyContainer && historyList) {
         historyContainer.classList.remove('hidden');
         historyList.innerHTML = history.map(q => 
             `<span class="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-cyan-400 text-[10px] font-bold rounded-full border border-white/10 cursor-pointer transition-all shadow-md flex items-center" onclick="executeHistorySearch('${q}')">
                 <i class="fa-solid fa-clock-rotate-left mr-1.5 opacity-50"></i>${q}
             </span>`
         ).join('');
-    } else {
+    } else if (historyContainer) {
         historyContainer.classList.add('hidden');
     }
 }
@@ -42,10 +60,9 @@ function loadSearchHistory() {
 function saveToHistory(query) {
     if (!query) return;
     let history = JSON.parse(localStorage.getItem('yuki_history')) || [];
-    // Remove if already exists to move it to top
     history = history.filter(item => item.toLowerCase() !== query.toLowerCase());
-    history.unshift(query); // Add to start
-    if (history.length > 8) history.pop(); // Keep only last 8 searches
+    history.unshift(query); 
+    if (history.length > 8) history.pop(); 
     localStorage.setItem('yuki_history', JSON.stringify(history));
     loadSearchHistory();
 }
@@ -57,70 +74,58 @@ if(clearHistoryBtn) {
     });
 }
 
-// Global function to trigger search from history chips
 window.executeHistorySearch = (query) => {
     searchInput.value = query;
-    emptyState.classList.add('hidden');
+    if(emptyState) emptyState.classList.add('hidden');
     fetchSongs(query);
 };
-
-// Initialize History on load
-loadSearchHistory();
 
 // ==========================================
 // 🚀 MAIN SEARCH CONTROLLER
 // ==========================================
 apiSwitch.addEventListener('change', () => {
-    const query = searchInput.value.trim();
-    if (query.length > 0) fetchSongs(query);
+    const query = searchInput.value.trim() || "Trending Hits"; // Agar khali hai to trending layega
+    fetchSongs(query);
 });
 
 searchInput.addEventListener('input', () => {
     clearTimeout(typingTimer);
     const query = searchInput.value.trim();
-    
+
     if (query.length > 0) {
-        emptyState.classList.add('hidden');
+        if(emptyState) emptyState.classList.add('hidden');
         typingTimer = setTimeout(() => fetchSongs(query), typingDelay);
     } else {
-        jiosaavnContainer.innerHTML = ''; 
-        youtubeContainer.innerHTML = '';
-        emptyState.classList.remove('hidden');
-        loadSearchHistory(); // Show history when box is empty
+        if(jiosaavnContainer) jiosaavnContainer.innerHTML = ''; 
+        if(emptyState) emptyState.classList.remove('hidden');
+        loadSearchHistory(); 
+        fetchTrendingOnLoad(); // Khali hone par wapas trending la do
     }
 });
 
 // ==========================================
 // 📡 FETCH ENGINE (WITH AUTO-CANCEL)
 // ==========================================
-async function fetchSongs(query) {
-    // Save to local storage
-    saveToHistory(query);
+async function fetchSongs(query, isSilentLoad = false) {
+    if (!isSilentLoad) saveToHistory(query);
 
-    // Cancel previous request if typing too fast
     if (currentAbortController) currentAbortController.abort();
     currentAbortController = new AbortController();
     const signal = currentAbortController.signal;
 
     // UI States
-    jiosaavnContainer.classList.add('hidden');
-    youtubeContainer.classList.add('hidden');
-    historyContainer.classList.add('hidden'); // Hide history while searching
-    skeletonLoader.classList.remove('hidden');
-    skeletonLoader.classList.add('flex');
-    jiosaavnContainer.innerHTML = ''; 
-    youtubeContainer.innerHTML = '';
+    if(historyContainer) historyContainer.classList.add('hidden'); 
+    
+    // Simple Loader logic for index.html compatibility
+    if(jiosaavnContainer) {
+        jiosaavnContainer.innerHTML = `
+        <li class="flex flex-col items-center justify-center py-8">
+            <i class="fa-solid fa-circle-notch fa-spin text-3xl text-cyan-400 mb-3 drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]"></i>
+            <span class="text-xs text-gray-400 tracking-widest uppercase">ꜱᴇᴀʀᴄʜɪɴɢ ᴍᴀᴛʀɪx...</span>
+        </li>`;
+    }
 
     const isYouTube = apiSwitch.checked; 
-
-    if (isYouTube) {
-        document.querySelector('.saavn-skeleton').classList.add('hidden');
-        document.querySelector('.yt-skeleton').classList.remove('hidden');
-        document.querySelector('.yt-skeleton').classList.add('flex');
-    } else {
-        document.querySelector('.saavn-skeleton').classList.remove('hidden');
-        document.querySelector('.yt-skeleton').classList.add('hidden');
-    }
 
     try {
         if (!isYouTube) {
@@ -142,7 +147,7 @@ async function fetchSongs(query) {
             }
         }
     } catch (error) {
-        if (error.name === 'AbortError') return; // Ignore cancelled requests
+        if (error.name === 'AbortError') return; 
         showError(`⚠️ ᴇʀʀᴏʀ: API Connection Failed`, isYouTube ? 'youtube' : 'jiosaavn');
     }
 }
@@ -151,26 +156,16 @@ async function fetchSongs(query) {
 // 🎨 RENDER ENGINE
 // ==========================================
 function renderAndQueueSongs(songs, platform) {
-    skeletonLoader.classList.add('hidden');
-    skeletonLoader.classList.remove('flex');
+    if(jiosaavnContainer) jiosaavnContainer.innerHTML = ''; 
 
     let formattedPlaylist = [];
-
-    if (platform === 'jiosaavn') {
-        youtubeContainer.classList.add('hidden');
-        jiosaavnContainer.classList.remove('hidden');
-    } else {
-        jiosaavnContainer.classList.add('hidden');
-        youtubeContainer.classList.remove('hidden');
-        youtubeContainer.classList.add('flex');
-    }
 
     songs.forEach((song, index) => {
         let title = platform === 'jiosaavn' ? song.name : (song.title || "Unknown");
         let artist = platform === 'jiosaavn' ? (song.artists?.primary?.length > 0 ? song.artists.primary[0].name : "Unknown") : (song.channel || "YouTube");
         let imgUrl = platform === 'jiosaavn' ? (song.image?.length > 0 ? song.image[song.image.length - 1].url : "https://telegra.ph/file/default.jpg") : (song.thumbnail || "https://telegra.ph/file/default.jpg");
         let audioUrl = platform === 'jiosaavn' ? (song.downloadUrl?.length > 0 ? song.downloadUrl[song.downloadUrl.length - 1].url : "") : `${YT_RAILWAY_API}/stream/${song.id}?type=audio`;
-        
+
         // 🎞️ EXTREMELY IMPORTANT FOR NEXT STEP: Video ID Extraction
         let videoId = platform === 'youtube' ? song.id : null;
 
@@ -180,12 +175,12 @@ function renderAndQueueSongs(songs, platform) {
             image: imgUrl, 
             url: audioUrl, 
             platform: platform,
-            videoId: videoId // Passes to player.js for IFrame playback
+            videoId: videoId 
         });
 
         if (platform === 'jiosaavn') {
             const li = document.createElement('li');
-            li.className = `flex items-center justify-between p-2.5 hover:bg-white/5 rounded-xl transition cursor-pointer border border-transparent hover:border-cyan-500 group`;
+            li.className = `flex items-center justify-between p-2.5 hover:bg-white/5 rounded-xl transition cursor-pointer border border-transparent hover:border-purple-500 group`;
             li.innerHTML = `
                 <div class="flex items-center space-x-3.5 w-[85%]">
                     <img src="${imgUrl}" class="w-12 h-12 rounded-lg object-cover shadow-md border border-gray-700 transition-colors">
@@ -196,43 +191,43 @@ function renderAndQueueSongs(songs, platform) {
                 </div>
                 <i class="fa-solid fa-play text-gray-500 p-2 group-hover:text-cyan-400 transition-colors drop-shadow-md"></i>
             `;
-            li.addEventListener('click', () => { if (typeof setQueueAndPlay === "function") setQueueAndPlay(formattedPlaylist, index); });
-            jiosaavnContainer.appendChild(li);
+            li.addEventListener('click', () => { 
+                const mode = apiSwitch.checked ? 'video' : 'music';
+                if (typeof switchMode === "function") switchMode(mode);
+                if (typeof setQueueAndPlay === "function") setQueueAndPlay(formattedPlaylist, index); 
+            });
+            if(jiosaavnContainer) jiosaavnContainer.appendChild(li);
 
         } else {
-            const div = document.createElement('div');
-            div.className = `flex flex-col space-y-3 p-2 group cursor-pointer bg-white/5 hover:bg-white/10 rounded-2xl border border-transparent hover:border-red-500 transition-all shadow-lg`;
-            div.innerHTML = `
-                <div class="relative w-full h-48 sm:h-56 rounded-xl overflow-hidden shadow-lg border border-white/5">
-                    <img src="${imgUrl}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity">
-                        <div class="w-14 h-14 bg-red-600/90 rounded-full flex items-center justify-center backdrop-blur-md shadow-[0_0_20px_rgba(220,38,38,0.6)] scale-75 group-hover:scale-100 transition-transform duration-300">
-                            <i class="fa-solid fa-play text-xl text-white ml-1"></i>
-                        </div>
-                    </div>
-                    <div class="absolute top-2 right-2 bg-black/80 text-white text-[9px] font-bold px-2 py-1 rounded backdrop-blur-md border border-white/10 tracking-widest"><i class="fa-brands fa-youtube text-red-500 mr-1"></i>VIDEO MIX</div>
-                </div>
-                <div class="flex space-x-3 px-1">
-                    <div class="flex-1">
-                        <h3 class="text-white text-sm font-bold line-clamp-2 leading-tight drop-shadow-md">${title}</h3>
-                        <p class="text-gray-400 text-[11px] mt-1.5 flex items-center"><i class="fa-solid fa-circle-check text-[9px] mr-1.5 text-blue-400"></i> ${artist}</p>
+            const li = document.createElement('li');
+            li.className = `flex items-center justify-between p-2.5 hover:bg-white/5 rounded-xl transition cursor-pointer border border-transparent hover:border-red-500 group`;
+            li.innerHTML = `
+                <div class="flex items-center space-x-3.5 w-[85%]">
+                    <img src="${imgUrl}" class="w-12 h-12 rounded-lg object-cover shadow-md border border-gray-700 transition-colors">
+                    <div class="truncate">
+                        <h3 class="text-white text-sm font-bold truncate w-full tracking-wide">${title}</h3>
+                        <p class="text-[11px] text-gray-400 mt-0.5 truncate flex items-center"><i class="fa-brands fa-youtube text-red-500 mr-1"></i> ${artist}</p>
                     </div>
                 </div>
+                <i class="fa-solid fa-play text-gray-500 p-2 group-hover:text-red-500 transition-colors drop-shadow-md"></i>
             `;
-            div.addEventListener('click', () => { if (typeof setQueueAndPlay === "function") setQueueAndPlay(formattedPlaylist, index); });
-            youtubeContainer.appendChild(div);
+            li.addEventListener('click', () => { 
+                const mode = apiSwitch.checked ? 'video' : 'music';
+                if (typeof switchMode === "function") switchMode(mode);
+                if (typeof setQueueAndPlay === "function") setQueueAndPlay(formattedPlaylist, index); 
+            });
+            if(jiosaavnContainer) jiosaavnContainer.appendChild(li); // Using same list container to avoid UI clutter
         }
     });
 }
 
 function showError(msg, platform) {
-    skeletonLoader.classList.add('hidden');
-    if(platform === 'youtube') {
-        youtubeContainer.classList.remove('hidden');
-        youtubeContainer.innerHTML = `<div class="text-center text-red-500 text-xs py-4 tracking-widest font-bold w-full bg-red-500/10 rounded-xl border border-red-500/20">${msg}</div>`;
-    } else {
-        jiosaavnContainer.classList.remove('hidden');
-        jiosaavnContainer.innerHTML = `<li class="text-center text-cyan-400 text-xs py-4 tracking-widest font-bold bg-cyan-500/10 rounded-xl border border-cyan-500/20">${msg}</li>`;
+    if(jiosaavnContainer) {
+        if(platform === 'youtube') {
+            jiosaavnContainer.innerHTML = `<li class="text-center text-red-500 text-xs py-4 tracking-widest font-bold w-full bg-red-500/10 rounded-xl border border-red-500/20">${msg}</li>`;
+        } else {
+            jiosaavnContainer.innerHTML = `<li class="text-center text-cyan-400 text-xs py-4 tracking-widest font-bold bg-cyan-500/10 rounded-xl border border-cyan-500/20">${msg}</li>`;
+        }
     }
 }
 
@@ -241,7 +236,7 @@ function showError(msg, platform) {
 // ==========================================
 async function fetchRelatedSongs(platform) {
     try {
-        const randomKeywords = ["latest hits", "trending mix", "lofi vibes", "punjabi hits", "bollywood mashup", "party mix", "chill tracks", "slowed reverb"];
+        const randomKeywords = ["latest hits", "trending mix", "lofi vibes", "punjabi hits", "bollywood mashup", "party mix"];
         const randomQuery = randomKeywords[Math.floor(Math.random() * randomKeywords.length)];
 
         let targetUrl = platform === 'jiosaavn' 
@@ -271,14 +266,13 @@ async function fetchRelatedSongs(platform) {
                     image: song.thumbnail || "https://telegra.ph/file/default.jpg",
                     url: `${YT_RAILWAY_API}/stream/${song.id}?type=audio`,
                     platform: 'youtube',
-                    videoId: song.id // Extracting Video ID
+                    videoId: song.id 
                 });
             });
         }
 
         newPlaylist = newPlaylist.sort(() => Math.random() - 0.5);
 
-        // Send to player.js to build "Up Next" queue
         if (typeof appendToQueue === "function" && newPlaylist.length > 0) {
             appendToQueue(newPlaylist);
         }
