@@ -90,9 +90,9 @@
                         <div class="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
                         <div class="w-2.5 h-2.5 rounded-full bg-green-500"></div>
                     </div>
-                    <p class="text-green-500 typewriter">> INITIALIZING YUKI_OS v2.0...</p>
-                    <p class="text-green-400 typewriter delay-1">> ESTABLISHING SECURE CONNECTION...</p>
-                    <p class="text-cyan-400 typewriter delay-2 mt-2 font-bold">> SYSTEM READY. WAITING FOR INPUT_</p>
+                    <p class="text-green-500 typewriter">> WELCOME TO YUKI MATRIX...</p>
+                    <p class="text-green-400 typewriter delay-1">> DEVELOPED BY MONSTER..</p>
+                    <p class="text-cyan-400 typewriter delay-2 mt-2 font-bold">> SYSTEM READY. WAITING FOR YOUR SEARCH...</p>
                 </div>
             </div>
 
@@ -144,9 +144,12 @@
 
         <div class="flex flex-col items-center justify-start px-8 pb-10 z-10 relative w-full min-h-screen">
 
-            <div id="media-container" class="relative w-full max-w-[350px] aspect-video sm:aspect-square mb-10 group overflow-hidden rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] border border-white/10 bg-[#0a0a0a] transition-all duration-500 flex items-center justify-center">
+                        <div id="media-container" class="relative w-full max-w-[350px] aspect-video sm:aspect-square mb-10 group overflow-hidden rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] border border-white/10 bg-[#0a0a0a] transition-all duration-500 flex items-center justify-center">
                 <img id="fs-img" src="" class="absolute inset-0 w-full h-full object-cover z-10 opacity-0 transition-opacity duration-500">
-                <div id="yt-video-player" class="absolute inset-0 w-full h-full z-20 opacity-0 pointer-events-none transition-opacity duration-500"></div>
+                
+                <div id="yt-container" class="absolute inset-0 w-full h-full z-20 opacity-0 pointer-events-none transition-opacity duration-500 bg-black">
+                    <div id="yt-video-player" class="w-full h-full"></div>
+                </div>
             </div>
 
             <div class="w-full flex justify-between items-end mb-8">
