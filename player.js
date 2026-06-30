@@ -1,16 +1,23 @@
 // ==========================================
-// 🚀 YUKI MATRIX - PRO PLAYER ENGINE 4.0 (STRICT RANDOM RADIO)
+// 🚀 YUKI MATRIX - PRO PLAYER ENGINE 4.1 (CRASH-PROOF & SAFE MODE)
 // ==========================================
 
-const tg = window.Telegram.WebApp;
-tg.expand(); 
-tg.ready();
-
-function triggerHaptic(style = 'light') {
-    if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style);
+// 🛡️ 1. SAFE TELEGRAM INITIALIZATION (Browser Crash Fix)
+const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+try {
+    if (tg && tg.expand) tg.expand();
+    if (tg && tg.ready) tg.ready();
+} catch(e) {
+    console.warn("Telegram WebApp not found, running in browser mode.");
 }
 
-// 🎛️ UI Elements Fetch
+function triggerHaptic(style = 'light') {
+    try {
+        if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style);
+    } catch(e) {}
+}
+
+// 🎛️ UI Elements Fetch (Safe Mode)
 const miniPlayer = document.getElementById('mini-player');
 const fullPlayer = document.getElementById('full-player');
 const closePlayerBtn = document.getElementById('close-player-btn');
@@ -47,9 +54,9 @@ window.onYouTubeIframeAPIReady = function() {
         height: '100%',
         width: '100%',
         playerVars: {
-            'controls': 1, // 🔥 YAHAN 1 KIYA HAI TAAKI QUALITY/SETTINGS DIKHE
+            'controls': 1, 
             'disablekb': 0, 
-            'fs': 1, // 🔥 Fullscreen ka option bhi on kar diya
+            'fs': 1, 
             'rel': 0, 
             'modestbranding': 1, 
             'playsinline': 1, 
@@ -61,49 +68,51 @@ window.onYouTubeIframeAPIReady = function() {
     });
 };
 
-
 // ==========================================
 // 🌟 PLAYER ANIMATIONS & TOGGLES
 // ==========================================
-miniPlayer.addEventListener('click', (e) => {
-    if(e.target.closest('#mini-play-btn') || e.target.classList.contains('fa-play') || e.target.classList.contains('fa-pause')) return;
-    triggerHaptic('medium');
-    fullPlayer.classList.remove('translate-y-full'); 
-});
+if(miniPlayer) {
+    miniPlayer.addEventListener('click', (e) => {
+        if(e.target.closest('#mini-play-btn') || e.target.classList.contains('fa-play') || e.target.classList.contains('fa-pause')) return;
+        triggerHaptic('medium');
+        if(fullPlayer) fullPlayer.classList.remove('translate-y-full'); 
+    });
+}
 
-closePlayerBtn.addEventListener('click', () => {
-    triggerHaptic('light');
-    fullPlayer.classList.add('translate-y-full'); 
-});
+if(closePlayerBtn) {
+    closePlayerBtn.addEventListener('click', () => {
+        triggerHaptic('light');
+        if(fullPlayer) fullPlayer.classList.add('translate-y-full'); 
+    });
+}
 
 // ==========================================
-// 🎶 STRICT RANDOM QUEUE SYSTEM (THE FIX)
+// 🎶 STRICT RANDOM QUEUE SYSTEM 
 // ==========================================
 function setQueueAndPlay(playlistData, index) {
-    // 🚨 FIX: Purani search list ko aag laga do! Sirf click kiya hua ek gaana rakho.
-    currentPlaylist = [playlistData[index]];
-    currentIndex = 0;
-    
-    // UI Update karo (Khali queue dikhao loading state me)
-    renderUpNextQueue(); 
-    loadSongIntoPlayer();
+    try {
+        currentPlaylist = [playlistData[index]];
+        currentIndex = 0;
 
-    // 🚀 Turaant API ko signal bhejo ki "Naye aur RANDOM gaane laao!"
-    if (typeof fetchRelatedSongs === "function") {
-        fetchRelatedSongs(playlistData[index].platform || 'jiosaavn');
+        renderUpNextQueue(); 
+        loadSongIntoPlayer();
+
+        if (typeof fetchRelatedSongs === "function") {
+            fetchRelatedSongs(playlistData[index].platform || 'jiosaavn');
+        }
+    } catch (error) {
+        console.error("Engine Error (setQueue): ", error);
     }
 }
 
 function appendToQueue(newSongs) {
     const existingNames = currentPlaylist.map(s => s.name);
     newSongs.forEach(song => {
-        // Sirf naye aur random gaane add honge
         if (!existingNames.includes(song.name)) {
             currentPlaylist.push(song);
         }
     });
-    console.log(`🔥 Random Radio Active: Queue Size -> ${currentPlaylist.length}`);
-    renderUpNextQueue(); // Queue update hote hi UI refresh karo
+    renderUpNextQueue(); 
 }
 
 // 📜 UP-NEXT UI RENDERER
@@ -112,10 +121,8 @@ function renderUpNextQueue() {
     if (!queueList) return;
     queueList.innerHTML = '';
 
-    // Agle 15 gaane dikhao
     const upNextSongs = currentPlaylist.slice(currentIndex + 1, currentIndex + 16);
 
-    // Agar Queue khali hai (matlab API se random gaane aa rahe hain)
     if (upNextSongs.length === 0) {
         queueList.innerHTML = `
             <li class="flex flex-col items-center justify-center p-6 bg-black/20 rounded-xl border border-white/5 shadow-inner">
@@ -157,67 +164,78 @@ function renderUpNextQueue() {
 // 🚀 CORE PLAYBACK ENGINE
 // ==========================================
 function loadSongIntoPlayer() {
-    if(currentPlaylist.length === 0) return;
+    try {
+        if(currentPlaylist.length === 0) return;
+        let song = currentPlaylist[currentIndex];
 
-    let song = currentPlaylist[currentIndex];
+        // 1. Text & Image Updates (Safe Checks)
+        if(fsTitle) fsTitle.innerText = song.name || "Unknown Track";
+        if(fsArtist) fsArtist.innerText = song.artist || "Unknown Artist";
+        if(miniTitle) miniTitle.innerText = song.name || "Unknown Track";
+        if(miniArtist) miniArtist.innerText = song.artist || "Unknown Artist";
+        if(miniImg) miniImg.src = song.image || "https://telegra.ph/file/default.jpg";
+        if(bgBlur) bgBlur.src = song.image || "https://telegra.ph/file/default.jpg";
 
-    // 1. Text & Image Updates
-    fsTitle.innerText = song.name || "Unknown Track";
-    fsArtist.innerText = song.artist || "Unknown Artist";
-    miniTitle.innerText = song.name || "Unknown Track";
-    miniArtist.innerText = song.artist || "Unknown Artist";
-    miniImg.src = song.image || "https://telegra.ph/file/default.jpg";
-    bgBlur.src = song.image || "https://telegra.ph/file/default.jpg";
+        const mediaContainer = document.getElementById('media-container');
+        const miniProgress = document.getElementById('mini-progress');
+        const ytVideoPlayer = document.getElementById('yt-video-player');
 
-    const mediaContainer = document.getElementById('media-container');
+        // 2. 📺 VIDEO vs AUDIO UI LOGIC
+        if (song.platform === 'youtube' && song.videoId) {
+            if(sourceLabel) {
+                sourceLabel.innerText = "YOUTUBE MUSIC";
+                sourceLabel.className = "text-[11px] text-red-500 font-bold tracking-widest mt-0.5 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]";
+            }
+            if(miniProgress) miniProgress.className = "h-full bg-gradient-to-r from-red-600 to-orange-500 w-0 relative transition-all duration-300";
 
-    // 2. 📺 VIDEO vs AUDIO UI LOGIC
-    if (song.platform === 'youtube' && song.videoId) {
-        // Video Mode On
-        sourceLabel.innerText = "YOUTUBE MUSIC";
-        sourceLabel.className = "text-[11px] text-red-500 font-bold tracking-widest mt-0.5 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]";
-        document.getElementById('mini-progress').className = "h-full bg-gradient-to-r from-red-600 to-orange-500 w-0 relative transition-all duration-300";
+            if(fsImage) fsImage.style.opacity = 0; 
+            if(ytVideoPlayer) ytVideoPlayer.classList.remove('opacity-0', 'hidden');
+            if(mediaContainer) {
+                mediaContainer.classList.add('aspect-video');
+                mediaContainer.classList.remove('sm:aspect-square');
+            }
 
-        fsImage.style.opacity = 0; // Hide Cover
-        document.getElementById('yt-video-player').classList.remove('opacity-0', 'hidden');
-        mediaContainer.classList.add('aspect-video');
-        mediaContainer.classList.remove('sm:aspect-square');
+            if (isYtReady && ytPlayer && ytPlayer.loadVideoById) {
+                ytPlayer.loadVideoById(song.videoId);
+                ytPlayer.mute(); 
+            }
+        } else {
+            if(sourceLabel) {
+                sourceLabel.innerText = "JIOSAAVN HD";
+                sourceLabel.className = "text-[11px] text-cyan-400 font-bold tracking-widest mt-0.5 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]";
+            }
+            if(miniProgress) miniProgress.className = "h-full bg-gradient-to-r from-purple-500 via-cyan-400 to-blue-500 w-0 relative transition-all duration-300";
 
-        // Load YouTube Video
-        if (isYtReady && ytPlayer && ytPlayer.loadVideoById) {
-            ytPlayer.loadVideoById(song.videoId);
-            ytPlayer.mute(); 
+            if(ytVideoPlayer) ytVideoPlayer.classList.add('opacity-0', 'pointer-events-none');
+            if(mediaContainer) {
+                mediaContainer.classList.remove('aspect-video');
+                mediaContainer.classList.add('sm:aspect-square');
+            }
+
+            if(fsImage) {
+                fsImage.src = song.image || "https://telegra.ph/file/default.jpg";
+                fsImage.style.opacity = 1; 
+            }
+
+            if (isYtReady && ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
         }
-    } else {
-        // Audio/JioSaavn Mode On
-        sourceLabel.innerText = "JIOSAAVN HD";
-        sourceLabel.className = "text-[11px] text-cyan-400 font-bold tracking-widest mt-0.5 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]";
-        document.getElementById('mini-progress').className = "h-full bg-gradient-to-r from-purple-500 via-cyan-400 to-blue-500 w-0 relative transition-all duration-300";
 
-        document.getElementById('yt-video-player').classList.add('opacity-0', 'pointer-events-none');
-        mediaContainer.classList.remove('aspect-video');
-        mediaContainer.classList.add('sm:aspect-square');
+        // 3. Audio Engine Load
+        if(audioEngine) {
+            audioEngine.src = song.url; 
+            audioEngine.load(); 
+            playAudio();
+        }
 
-        fsImage.src = song.image || "https://telegra.ph/file/default.jpg";
-        fsImage.style.opacity = 1; // Show Cover
+        triggerHaptic('heavy');
+        updateMediaSession(song);
+        renderUpNextQueue(); 
 
-        if (isYtReady && ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
-    }
-
-    // 3. Audio Engine Load
-    if(audioEngine) {
-        audioEngine.src = song.url; 
-        audioEngine.load(); 
-        playAudio();
-    }
-
-    triggerHaptic('heavy');
-    updateMediaSession(song);
-    renderUpNextQueue(); 
-
-    // 4. Auto-Radio Trigger (Queue me aakhri gaano par pahuche to aur random laao)
-    if (typeof fetchRelatedSongs === "function" && currentIndex >= currentPlaylist.length - 3) {
-        fetchRelatedSongs(song.platform || 'jiosaavn');
+        if (typeof fetchRelatedSongs === "function" && currentIndex >= currentPlaylist.length - 3) {
+            fetchRelatedSongs(song.platform || 'jiosaavn');
+        }
+    } catch (error) {
+        console.error("Player Load Error: ", error);
     }
 }
 
@@ -225,44 +243,45 @@ function loadSongIntoPlayer() {
 // 🛡️ ADVANCED AUDIO CONTROLS
 // ==========================================
 function playAudio() {
-    if(!audioEngine.src) return;
+    if(!audioEngine || !audioEngine.src) return;
 
     audioEngine.play().then(() => {
         isPlaying = true;
-        playIcon.className = 'fa-solid fa-pause text-3xl text-black ml-1';
-        miniPlayBtnNode.className = 'fa-solid fa-pause text-white text-xl drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]';
+        if(playIcon) playIcon.className = 'fa-solid fa-pause text-3xl text-black ml-1';
+        if(miniPlayBtnNode) miniPlayBtnNode.className = 'fa-solid fa-pause text-white text-xl drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]';
 
         let song = currentPlaylist[currentIndex];
         if(song && song.platform === 'youtube' && isYtReady && ytPlayer && ytPlayer.playVideo) {
             ytPlayer.playVideo();
         }
     }).catch(e => {
-        console.log("Autoplay blocked:", e);
+        console.log("Autoplay blocked by Browser:", e);
         isPlaying = false;
         pauseUI();
     });
 }
 
 function pauseAudio() {
-    audioEngine.pause();
+    if(audioEngine) audioEngine.pause();
     isPlaying = false;
     pauseUI();
     if(isYtReady && ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo(); 
 }
 
 function pauseUI() {
-    playIcon.className = 'fa-solid fa-play text-3xl text-black ml-1';
-    miniPlayBtnNode.className = 'fa-solid fa-play text-white text-xl';
+    if(playIcon) playIcon.className = 'fa-solid fa-play text-3xl text-black ml-1';
+    if(miniPlayBtnNode) miniPlayBtnNode.className = 'fa-solid fa-play text-white text-xl';
 }
 
 function togglePlay() {
     triggerHaptic('light');
-    if (audioEngine.paused) playAudio();
+    if (audioEngine && audioEngine.paused) playAudio();
     else pauseAudio();
 }
 
-document.getElementById('play-pause-btn').addEventListener('click', togglePlay);
-miniPlayBtnNode.addEventListener('click', (e) => { e.stopPropagation(); togglePlay(); });
+const mainPlayBtn = document.getElementById('play-pause-btn');
+if(mainPlayBtn) mainPlayBtn.addEventListener('click', togglePlay);
+if(miniPlayBtnNode) miniPlayBtnNode.addEventListener('click', (e) => { e.stopPropagation(); togglePlay(); });
 
 // ==========================================
 // ⏭️ TRACK NAVIGATION
@@ -289,40 +308,42 @@ function playPrev() {
     }
 }
 
-audioEngine.addEventListener('ended', () => {
-    if (isRepeat) {
-        audioEngine.currentTime = 0;
-        if(isYtReady && ytPlayer && ytPlayer.seekTo) ytPlayer.seekTo(0);
-        playAudio();
-    } else {
-        playNext();
-    }
-});
+if(audioEngine) {
+    audioEngine.addEventListener('ended', () => {
+        if (isRepeat) {
+            audioEngine.currentTime = 0;
+            if(isYtReady && ytPlayer && ytPlayer.seekTo) ytPlayer.seekTo(0);
+            playAudio();
+        } else {
+            playNext();
+        }
+    });
 
-audioEngine.addEventListener('error', () => {
-    console.warn("⚠️ Stream Failed! Skipping to completely random track...");
-    setTimeout(playNext, 1000); 
-});
+    audioEngine.addEventListener('error', () => {
+        console.warn("⚠️ Stream Failed! Skipping to next track...");
+        setTimeout(playNext, 1000); 
+    });
 
-audioEngine.addEventListener('waiting', () => {
-    playIcon.className = 'fa-solid fa-circle-notch fa-spin text-3xl text-black';
-});
-audioEngine.addEventListener('playing', () => {
-    playIcon.className = 'fa-solid fa-pause text-3xl text-black ml-1';
-});
+    audioEngine.addEventListener('waiting', () => {
+        if(playIcon) playIcon.className = 'fa-solid fa-circle-notch fa-spin text-3xl text-black';
+    });
+    audioEngine.addEventListener('playing', () => {
+        if(playIcon) playIcon.className = 'fa-solid fa-pause text-3xl text-black ml-1';
+    });
+}
 
 // ==========================================
 // 📱 LOCK SCREEN PLAYER (MEDIA SESSION)
 // ==========================================
 function updateMediaSession(song) {
-    if ('mediaSession' in navigator) {
+    if ('mediaSession' in navigator && song) {
         navigator.mediaSession.metadata = new MediaMetadata({
-            title: song.name,
-            artist: song.artist,
+            title: song.name || 'Unknown Track',
+            artist: song.artist || 'Unknown Artist',
             album: song.platform === 'youtube' ? 'YouTube Mix' : 'JioSaavn Mix',
             artwork: [
-                { src: song.image, sizes: '96x96', type: 'image/jpeg' },
-                { src: song.image, sizes: '512x512', type: 'image/jpeg' }
+                { src: song.image || '', sizes: '96x96', type: 'image/jpeg' },
+                { src: song.image || '', sizes: '512x512', type: 'image/jpeg' }
             ]
         });
 
