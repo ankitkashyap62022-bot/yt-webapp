@@ -1,5 +1,5 @@
 // ==========================================
-// 🚀 YUKI MATRIX - PRO PLAYER ENGINE 4.2 (ANTI-CRASH & CACHE BYPASS)
+// 🚀 YUKI MATRIX - PRO PLAYER ENGINE 4.2 (FULL YUKITUBE BRANDING & VIDEO FIX)
 // ==========================================
 
 // 🛡️ 1. SAFE TELEGRAM INITIALIZATION (Browser & Bot Safe)
@@ -32,7 +32,6 @@ const miniArtist = document.getElementById('mini-artist');
 const bgBlur = document.getElementById('player-bg-blur');
 const sourceLabel = document.getElementById('player-source-label');
 
-// 🚨 BUG KILLED HERE: Renamed to 'sysAudio' so it doesn't clash with audio.js!
 const sysAudio = document.getElementById('audio-engine');
 
 const playIcon = document.getElementById('play-icon');
@@ -46,7 +45,7 @@ let isShuffle = false;
 let isRepeat = false; 
 
 // ==========================================
-// 🎞️ YOUTUBE IFRAME API (VIDEO ENGINE)
+// 🎞️ YUKITUBE IFRAME API (VIDEO ENGINE)
 // ==========================================
 let ytPlayer = null;
 let isYtReady = false;
@@ -65,7 +64,7 @@ window.onYouTubeIframeAPIReady = function() {
             'autoplay': 1
         },
         events: {
-            'onReady': () => { isYtReady = true; console.log("📺 YouTube Video Engine Ready!"); }
+            'onReady': () => { isYtReady = true; console.log("📺 YukiTube Video Engine Ready!"); }
         }
     });
 };
@@ -148,7 +147,7 @@ function renderUpNextQueue() {
                 </div>
                 <div class="truncate">
                     <h4 class="text-white text-xs font-bold truncate tracking-wide">${song.name}</h4>
-                    <p class="text-[9px] text-gray-400 mt-1.5 truncate flex items-center font-semibold"><i class="fa-solid fa-circle text-[5px] mr-1.5 ${iconColor}"></i> ${song.artist}</p>
+                    <p class="text-[9px] text-gray-400 mt-1.5 truncate flex items-center font-semibold"><i class="fa-solid fa-circle text-[5px] mr-1.5 ${iconColor}"></i> ${song.artist === 'YouTube' ? 'YukiTube' : song.artist}</p>
                 </div>
             </div>
             <i class="fa-solid fa-ellipsis-vertical text-gray-600 px-2 group-hover:text-white transition-colors"></i>
@@ -172,10 +171,10 @@ function loadSongIntoPlayer() {
 
         // 1. Text & Image Updates
         if(fsTitle) fsTitle.innerText = song.name || "Unknown Track";
-        if(fsArtist) fsArtist.innerText = song.artist || "Unknown Artist";
+        if(fsArtist) fsArtist.innerText = song.artist === 'YouTube' ? 'YukiTube' : (song.artist || "Unknown Artist");
         if(miniTitle) miniTitle.innerText = song.name || "Unknown Track";
-        if(miniArtist) miniArtist.innerText = song.artist || "Unknown Artist";
-        
+        if(miniArtist) miniArtist.innerText = song.artist === 'YouTube' ? 'YukiTube' : (song.artist || "Unknown Artist");
+
         // Handling empty image sources to prevent broken icons
         const safeImage = song.image && song.image.length > 5 ? song.image : "https://telegra.ph/file/default.jpg";
         if(miniImg) miniImg.src = safeImage;
@@ -185,16 +184,23 @@ function loadSongIntoPlayer() {
         const miniProgress = document.getElementById('mini-progress');
         const ytVideoPlayer = document.getElementById('yt-video-player');
 
-        // 2. 📺 VIDEO vs AUDIO UI LOGIC
+        // 2. 📺 YUKITUBE VIDEO vs AUDIO UI LOGIC
         if (song.platform === 'youtube' && song.videoId) {
+            // 🔥 YUKITUBE BRANDING
             if(sourceLabel) {
-                sourceLabel.innerText = "YOUTUBE MUSIC";
-                sourceLabel.className = "text-[11px] text-red-500 font-bold tracking-widest mt-0.5 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]";
+                sourceLabel.innerText = "YUKITUBE";
+                sourceLabel.className = "text-[12px] text-red-500 font-black tracking-widest mt-0.5 drop-shadow-[0_0_10px_rgba(239,68,68,0.9)]";
             }
-            if(miniProgress) miniProgress.className = "h-full bg-gradient-to-r from-red-600 to-orange-500 w-0 relative transition-all duration-300";
+            if(miniProgress) miniProgress.className = "h-full bg-gradient-to-r from-red-600 to-orange-500 w-0 relative transition-all duration-300 shadow-[0_0_10px_rgba(239,68,68,0.8)]";
 
             if(fsImage) fsImage.style.opacity = 0; 
-            if(ytVideoPlayer) ytVideoPlayer.classList.remove('opacity-0', 'hidden');
+            
+            // 🚨 VIDEO FIX: Showing iframe correctly
+            if(ytVideoPlayer) {
+                ytVideoPlayer.classList.remove('opacity-0', 'pointer-events-none', 'hidden');
+                ytVideoPlayer.classList.add('opacity-100');
+            }
+            
             if(mediaContainer) {
                 mediaContainer.classList.add('aspect-video');
                 mediaContainer.classList.remove('sm:aspect-square');
@@ -202,16 +208,22 @@ function loadSongIntoPlayer() {
 
             if (isYtReady && ytPlayer && ytPlayer.loadVideoById) {
                 ytPlayer.loadVideoById(song.videoId);
-                ytPlayer.mute(); 
+                ytPlayer.mute(); // Muting iframe because High Quality Audio comes from Railway API
             }
         } else {
+            // JIOSAAVN BRANDING
             if(sourceLabel) {
                 sourceLabel.innerText = "JIOSAAVN HD";
                 sourceLabel.className = "text-[11px] text-cyan-400 font-bold tracking-widest mt-0.5 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]";
             }
-            if(miniProgress) miniProgress.className = "h-full bg-gradient-to-r from-purple-500 via-cyan-400 to-blue-500 w-0 relative transition-all duration-300";
+            if(miniProgress) miniProgress.className = "h-full bg-gradient-to-r from-purple-500 via-cyan-400 to-blue-500 w-0 relative transition-all duration-300 shadow-[0_0_10px_rgba(34,211,238,0.8)]";
 
-            if(ytVideoPlayer) ytVideoPlayer.classList.add('opacity-0', 'pointer-events-none');
+            // 🚨 HIDING VIDEO CORRECTLY
+            if(ytVideoPlayer) {
+                ytVideoPlayer.classList.remove('opacity-100');
+                ytVideoPlayer.classList.add('opacity-0', 'pointer-events-none');
+            }
+            
             if(mediaContainer) {
                 mediaContainer.classList.remove('aspect-video');
                 mediaContainer.classList.add('sm:aspect-square');
@@ -253,7 +265,7 @@ function playAudio() {
     sysAudio.play().then(() => {
         isPlaying = true;
         if(playIcon) playIcon.className = 'fa-solid fa-pause text-3xl text-black ml-1';
-        if(miniPlayBtnNode) miniPlayBtnNode.className = 'fa-solid fa-pause text-white text-xl drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]';
+        if(miniPlayBtnNode) miniPlayBtnNode.className = 'fa-solid fa-pause text-white text-2xl drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]';
 
         let song = currentPlaylist[currentIndex];
         if(song && song.platform === 'youtube' && isYtReady && ytPlayer && ytPlayer.playVideo) {
@@ -275,7 +287,7 @@ function pauseAudio() {
 
 function pauseUI() {
     if(playIcon) playIcon.className = 'fa-solid fa-play text-3xl text-black ml-1';
-    if(miniPlayBtnNode) miniPlayBtnNode.className = 'fa-solid fa-play text-white text-xl';
+    if(miniPlayBtnNode) miniPlayBtnNode.className = 'fa-solid fa-play text-white text-2xl';
 }
 
 function togglePlay() {
@@ -344,8 +356,8 @@ function updateMediaSession(song) {
     if ('mediaSession' in navigator && song) {
         navigator.mediaSession.metadata = new MediaMetadata({
             title: song.name || 'Unknown Track',
-            artist: song.artist || 'Unknown Artist',
-            album: song.platform === 'youtube' ? 'YouTube Mix' : 'JioSaavn Mix',
+            artist: song.artist === 'YouTube' ? 'YukiTube' : (song.artist || 'Unknown Artist'),
+            album: song.platform === 'youtube' ? 'YukiTube Mix' : 'JioSaavn Mix',
             artwork: [
                 { src: song.image || 'https://telegra.ph/file/default.jpg', sizes: '96x96', type: 'image/jpeg' },
                 { src: song.image || 'https://telegra.ph/file/default.jpg', sizes: '512x512', type: 'image/jpeg' }
