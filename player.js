@@ -1,15 +1,13 @@
 // ==========================================
-// 🚀 YUKI MATRIX - PRO PLAYER ENGINE 4.2 (FULL YUKITUBE BRANDING & VIDEO FIX)
+// 🚀 YUKI MATRIX - PRO PLAYER ENGINE 4.3 (VIDEO VISIBILITY FIX)
 // ==========================================
 
-// 🛡️ 1. SAFE TELEGRAM INITIALIZATION (Browser & Bot Safe)
+// 🛡️ 1. SAFE TELEGRAM INITIALIZATION
 const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 try {
     if (tg && tg.expand) tg.expand();
     if (tg && tg.ready) tg.ready();
-} catch(e) {
-    console.warn("Telegram WebApp not found, running in browser mode.");
-}
+} catch(e) {}
 
 function triggerHaptic(style = 'light') {
     try {
@@ -55,9 +53,9 @@ window.onYouTubeIframeAPIReady = function() {
         height: '100%',
         width: '100%',
         playerVars: {
-            'controls': 1, 
-            'disablekb': 0, 
-            'fs': 1, 
+            'controls': 0, // UI clean rakhne ke liye default YT controls hide
+            'disablekb': 1, 
+            'fs': 0, 
             'rel': 0, 
             'modestbranding': 1, 
             'playsinline': 1, 
@@ -70,7 +68,7 @@ window.onYouTubeIframeAPIReady = function() {
 };
 
 // ==========================================
-// 🌟 PLAYER ANIMATIONS & TOGGLES
+// 🌟 PLAYER ANIMATIONS
 // ==========================================
 if(miniPlayer) {
     miniPlayer.addEventListener('click', (e) => {
@@ -94,34 +92,24 @@ function setQueueAndPlay(playlistData, index) {
     try {
         currentPlaylist = [playlistData[index]];
         currentIndex = 0;
-
         renderUpNextQueue(); 
         loadSongIntoPlayer();
-
-        if (typeof fetchRelatedSongs === "function") {
-            fetchRelatedSongs(playlistData[index].platform || 'jiosaavn');
-        }
-    } catch (error) {
-        console.error("Engine Error (setQueue): ", error);
-    }
+        if (typeof fetchRelatedSongs === "function") fetchRelatedSongs(playlistData[index].platform || 'jiosaavn');
+    } catch (error) { console.error("Engine Error: ", error); }
 }
 
 function appendToQueue(newSongs) {
     const existingNames = currentPlaylist.map(s => s.name);
     newSongs.forEach(song => {
-        if (!existingNames.includes(song.name)) {
-            currentPlaylist.push(song);
-        }
+        if (!existingNames.includes(song.name)) currentPlaylist.push(song);
     });
     renderUpNextQueue(); 
 }
 
-// 📜 UP-NEXT UI RENDERER
 function renderUpNextQueue() {
     const queueList = document.getElementById('player-queue-list');
     if (!queueList) return;
     queueList.innerHTML = '';
-
     const upNextSongs = currentPlaylist.slice(currentIndex + 1, currentIndex + 16);
 
     if (upNextSongs.length === 0) {
@@ -169,75 +157,65 @@ function loadSongIntoPlayer() {
         if(currentPlaylist.length === 0) return;
         let song = currentPlaylist[currentIndex];
 
-        // 1. Text & Image Updates
         if(fsTitle) fsTitle.innerText = song.name || "Unknown Track";
         if(fsArtist) fsArtist.innerText = song.artist === 'YouTube' ? 'YukiTube' : (song.artist || "Unknown Artist");
         if(miniTitle) miniTitle.innerText = song.name || "Unknown Track";
         if(miniArtist) miniArtist.innerText = song.artist === 'YouTube' ? 'YukiTube' : (song.artist || "Unknown Artist");
 
-        // Handling empty image sources to prevent broken icons
         const safeImage = song.image && song.image.length > 5 ? song.image : "https://telegra.ph/file/default.jpg";
         if(miniImg) miniImg.src = safeImage;
         if(bgBlur) bgBlur.src = safeImage;
 
         const mediaContainer = document.getElementById('media-container');
         const miniProgress = document.getElementById('mini-progress');
-        const ytVideoPlayer = document.getElementById('yt-video-player');
+        const ytContainer = document.getElementById('yt-container'); // 🔥 Target FIX
 
-        // 2. 📺 YUKITUBE VIDEO vs AUDIO UI LOGIC
         if (song.platform === 'youtube' && song.videoId) {
-            // 🔥 YUKITUBE BRANDING
+            // YUKITUBE ON
             if(sourceLabel) {
                 sourceLabel.innerText = "YUKITUBE";
                 sourceLabel.className = "text-[12px] text-red-500 font-black tracking-widest mt-0.5 drop-shadow-[0_0_10px_rgba(239,68,68,0.9)]";
             }
             if(miniProgress) miniProgress.className = "h-full bg-gradient-to-r from-red-600 to-orange-500 w-0 relative transition-all duration-300 shadow-[0_0_10px_rgba(239,68,68,0.8)]";
-
             if(fsImage) fsImage.style.opacity = 0; 
             
-            // 🚨 VIDEO FIX: Showing iframe correctly
-            if(ytVideoPlayer) {
-                ytVideoPlayer.classList.remove('opacity-0', 'pointer-events-none', 'hidden');
-                ytVideoPlayer.classList.add('opacity-100');
+            // 🔥 Yaha Wrapper div (ytContainer) ko visible kiya
+            if(ytContainer) {
+                ytContainer.classList.remove('opacity-0', 'pointer-events-none', 'hidden');
+                ytContainer.classList.add('opacity-100');
             }
-            
             if(mediaContainer) {
                 mediaContainer.classList.add('aspect-video');
                 mediaContainer.classList.remove('sm:aspect-square');
             }
-
             if (isYtReady && ytPlayer && ytPlayer.loadVideoById) {
                 ytPlayer.loadVideoById(song.videoId);
-                ytPlayer.mute(); // Muting iframe because High Quality Audio comes from Railway API
+                ytPlayer.mute(); 
             }
         } else {
-            // JIOSAAVN BRANDING
+            // JIOSAAVN ON
             if(sourceLabel) {
                 sourceLabel.innerText = "JIOSAAVN HD";
                 sourceLabel.className = "text-[11px] text-cyan-400 font-bold tracking-widest mt-0.5 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]";
             }
             if(miniProgress) miniProgress.className = "h-full bg-gradient-to-r from-purple-500 via-cyan-400 to-blue-500 w-0 relative transition-all duration-300 shadow-[0_0_10px_rgba(34,211,238,0.8)]";
-
-            // 🚨 HIDING VIDEO CORRECTLY
-            if(ytVideoPlayer) {
-                ytVideoPlayer.classList.remove('opacity-100');
-                ytVideoPlayer.classList.add('opacity-0', 'pointer-events-none');
-            }
             
+            // 🔥 Yaha Wrapper div (ytContainer) ko hide kiya
+            if(ytContainer) {
+                ytContainer.classList.remove('opacity-100');
+                ytContainer.classList.add('opacity-0', 'pointer-events-none');
+            }
             if(mediaContainer) {
                 mediaContainer.classList.remove('aspect-video');
                 mediaContainer.classList.add('sm:aspect-square');
             }
-
             if(fsImage) {
                 fsImage.src = safeImage;
                 fsImage.style.opacity = 1; 
             }
-
             if (isYtReady && ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
         }
 
-        // 3. Audio Engine Load
         if(sysAudio) {
             sysAudio.src = song.url; 
             sysAudio.load(); 
@@ -247,13 +225,7 @@ function loadSongIntoPlayer() {
         triggerHaptic('heavy');
         updateMediaSession(song);
         renderUpNextQueue(); 
-
-        if (typeof fetchRelatedSongs === "function" && currentIndex >= currentPlaylist.length - 3) {
-            fetchRelatedSongs(song.platform || 'jiosaavn');
-        }
-    } catch (error) {
-        console.error("Player Load Error: ", error);
-    }
+    } catch (error) { console.error("Player Load Error: ", error); }
 }
 
 // ==========================================
@@ -261,18 +233,15 @@ function loadSongIntoPlayer() {
 // ==========================================
 function playAudio() {
     if(!sysAudio || !sysAudio.src) return;
-
     sysAudio.play().then(() => {
         isPlaying = true;
         if(playIcon) playIcon.className = 'fa-solid fa-pause text-3xl text-black ml-1';
         if(miniPlayBtnNode) miniPlayBtnNode.className = 'fa-solid fa-pause text-white text-2xl drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]';
 
         let song = currentPlaylist[currentIndex];
-        if(song && song.platform === 'youtube' && isYtReady && ytPlayer && ytPlayer.playVideo) {
-            ytPlayer.playVideo();
-        }
+        if(song && song.platform === 'youtube' && isYtReady && ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo();
     }).catch(e => {
-        console.log("Autoplay blocked by Browser:", e);
+        console.log("Autoplay blocked:", e);
         isPlaying = false;
         pauseUI();
     });
@@ -305,11 +274,8 @@ if(miniPlayBtnNode) miniPlayBtnNode.addEventListener('click', (e) => { e.stopPro
 // ==========================================
 function playNext() {
     triggerHaptic('light');
-    if (currentIndex < currentPlaylist.length - 1) {
-        currentIndex++;
-    } else {
-        currentIndex = 0; 
-    }
+    if (currentIndex < currentPlaylist.length - 1) currentIndex++;
+    else currentIndex = 0; 
     loadSongIntoPlayer();
 }
 
@@ -327,46 +293,27 @@ function playPrev() {
 
 if(sysAudio) {
     sysAudio.addEventListener('ended', () => {
-        if (isRepeat) {
-            sysAudio.currentTime = 0;
-            if(isYtReady && ytPlayer && ytPlayer.seekTo) ytPlayer.seekTo(0);
-            playAudio();
-        } else {
-            playNext();
-        }
+        if (isRepeat) { sysAudio.currentTime = 0; if(isYtReady && ytPlayer) ytPlayer.seekTo(0); playAudio(); } 
+        else playNext();
     });
-
-    sysAudio.addEventListener('error', () => {
-        console.warn("⚠️ Stream Failed! Skipping to next track...");
-        setTimeout(playNext, 1000); 
-    });
-
-    sysAudio.addEventListener('waiting', () => {
-        if(playIcon) playIcon.className = 'fa-solid fa-circle-notch fa-spin text-3xl text-black';
-    });
-    sysAudio.addEventListener('playing', () => {
-        if(playIcon) playIcon.className = 'fa-solid fa-pause text-3xl text-black ml-1';
-    });
+    sysAudio.addEventListener('error', () => setTimeout(playNext, 1000));
+    sysAudio.addEventListener('waiting', () => { if(playIcon) playIcon.className = 'fa-solid fa-circle-notch fa-spin text-3xl text-black'; });
+    sysAudio.addEventListener('playing', () => { if(playIcon) playIcon.className = 'fa-solid fa-pause text-3xl text-black ml-1'; });
 }
 
-// ==========================================
-// 📱 LOCK SCREEN PLAYER (MEDIA SESSION)
-// ==========================================
 function updateMediaSession(song) {
     if ('mediaSession' in navigator && song) {
         navigator.mediaSession.metadata = new MediaMetadata({
-            title: song.name || 'Unknown Track',
-            artist: song.artist === 'YouTube' ? 'YukiTube' : (song.artist || 'Unknown Artist'),
-            album: song.platform === 'youtube' ? 'YukiTube Mix' : 'JioSaavn Mix',
+            title: song.name || 'Unknown',
+            artist: song.artist === 'YouTube' ? 'YukiTube' : (song.artist || 'Unknown'),
+            album: song.platform === 'youtube' ? 'YukiTube' : 'JioSaavn',
             artwork: [
-                { src: song.image || 'https://telegra.ph/file/default.jpg', sizes: '96x96', type: 'image/jpeg' },
                 { src: song.image || 'https://telegra.ph/file/default.jpg', sizes: '512x512', type: 'image/jpeg' }
             ]
         });
-
         navigator.mediaSession.setActionHandler('play', playAudio);
         navigator.mediaSession.setActionHandler('pause', pauseAudio);
-        navigator.mediaSession.setActionHandler('previoustrack', playPrev);
         navigator.mediaSession.setActionHandler('nexttrack', playNext);
+        navigator.mediaSession.setActionHandler('previoustrack', playPrev);
     }
 }
