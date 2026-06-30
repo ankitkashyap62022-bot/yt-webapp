@@ -37,7 +37,7 @@ let isShuffle = false;
 let isRepeat = false; 
 
 // ==========================================
-// 🎞️ YOUTUBE IFRAME API (VIDEO ENGINE)
+// 🎞️ YOUTUBE IFRAME API (VIDEO ENGINE FIX)
 // ==========================================
 let ytPlayer = null;
 let isYtReady = false;
@@ -47,13 +47,20 @@ window.onYouTubeIframeAPIReady = function() {
         height: '100%',
         width: '100%',
         playerVars: {
-            'controls': 0, 'disablekb': 1, 'fs': 0, 'rel': 0, 'modestbranding': 1, 'playsinline': 1, 'mute': 1, 'autoplay': 1
+            'controls': 1, // 🔥 YAHAN 1 KIYA HAI TAAKI QUALITY/SETTINGS DIKHE
+            'disablekb': 0, 
+            'fs': 1, // 🔥 Fullscreen ka option bhi on kar diya
+            'rel': 0, 
+            'modestbranding': 1, 
+            'playsinline': 1, 
+            'autoplay': 1
         },
         events: {
             'onReady': () => { isYtReady = true; console.log("📺 YouTube Video Engine Ready!"); }
         }
     });
 };
+
 
 // ==========================================
 // 🌟 PLAYER ANIMATIONS & TOGGLES
