@@ -29,7 +29,7 @@
         @keyframes typing { to { width: 100%; } }
         @keyframes blink { 50% { border-color: transparent; } }
         @keyframes shimmer { 100% { transform: translateX(100%); } }
-        
+
         .skeleton { position: relative; overflow: hidden; background-color: #1f2937; }
         .skeleton::after {
             position: absolute; top: 0; right: 0; bottom: 0; left: 0;
@@ -77,16 +77,6 @@
                 <div id="search-history-list" class="flex flex-wrap gap-2"></div>
             </div>
 
-            <!-- DEFAULT TRENDING SECTION (New) -->
-            <div id="default-trending-container" class="hidden w-full mb-6 mt-2">
-                <div class="flex justify-between items-center mb-3 px-1">
-                    <h2 id="trending-title" class="text-[11px] text-cyan-400 font-bold tracking-widest uppercase"><i class="fa-solid fa-fire mr-1 text-orange-500"></i> Trending Now</h2>
-                </div>
-                <div id="default-trending-list" class="flex flex-col space-y-4">
-                    <!-- Default songs will load here via api.js -->
-                </div>
-            </div>
-
             <!-- TERMINAL WELCOME -->
             <div id="empty-state" class="flex flex-col items-start justify-center mt-4 px-2 terminal-text text-xs">
                 <div class="w-full bg-black/50 border border-green-500/30 rounded-lg p-4 shadow-[0_0_20px_rgba(34,197,94,0.1)]">
@@ -107,14 +97,13 @@
                 <div class="yt-skeleton hidden flex-col space-y-3 p-2"><div class="w-full h-48 rounded-xl skeleton"></div><div class="flex space-x-3"><div class="w-10 h-10 rounded-full skeleton"></div><div class="flex-1 space-y-2 py-1"><div class="h-3 bg-gray-800 rounded w-5/6 skeleton"></div><div class="h-2 bg-gray-800 rounded w-2/3 skeleton"></div></div></div></div>
             </div>
 
-            <!-- SEARCH RESULTS -->
-            <ul id="jiosaavn-results" class="space-y-1.5 transition-opacity duration-300"></ul>
-            <div id="youtube-results" class="hidden flex-col space-y-6 transition-opacity duration-300"></div>
+            <!-- 🚨 FIXED: SINGLE SEARCH RESULTS CONTAINER -->
+            <ul id="search-results" class="space-y-4 transition-opacity duration-300 w-full mt-2"></ul>
 
         </section>
     </main>
 
-    <!-- HIDDEN MINI PLAYER (Now hidden by default with translate & opacity) -->
+    <!-- HIDDEN MINI PLAYER -->
     <div id="mini-player" class="fixed bottom-[80px] left-3 right-3 bg-gray-900/95 backdrop-blur-2xl border border-white/10 rounded-2xl p-2.5 flex items-center justify-between cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.8)] z-40 transition-all duration-500 translate-y-[250%] opacity-0 pointer-events-none">
         <div class="flex items-center space-x-3.5 w-[65%] z-10">
             <div class="w-11 h-11 rounded-lg bg-black/50 border border-white/5 flex items-center justify-center overflow-hidden">
@@ -154,7 +143,7 @@
 
         <div class="flex flex-col items-center justify-start px-8 pb-10 z-10 relative w-full min-h-screen">
 
-            <!-- YT Video Container (Ready for real controls) -->
+            <!-- YT Video Container -->
             <div id="media-container" class="relative w-full max-w-[350px] aspect-video sm:aspect-square mb-10 group overflow-hidden rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] border border-white/10 bg-[#0a0a0a] transition-all duration-500 flex items-center justify-center">
                 <img id="fs-img" src="" class="absolute inset-0 w-full h-full object-cover z-10 opacity-0 transition-opacity duration-500">
                 <div id="yt-video-player" class="absolute inset-0 w-full h-full z-20 opacity-0 pointer-events-none transition-opacity duration-500"></div>
@@ -208,8 +197,10 @@
     </nav>
 
     <audio id="audio-engine"></audio>
-    <script src="player.js?v=9"></script>
+    
+    <!-- 🚨 FIXED: SCRIPT LOAD ORDER -->
     <script src="audio.js?v=9"></script> 
+    <script src="player.js?v=9"></script>
     <script src="api.js?v=9"></script>
 
 </body>
